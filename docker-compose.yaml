@@ -1,0 +1,51 @@
+version: '3.8'
+
+networks:
+  default-network:
+    driver: bridge
+
+services:
+
+  post-service:
+    container_name: post-service
+    depends_on:
+      post-service-storage:
+        condition: service_healthy
+    build:
+        dockerfile: Dockerfile
+    environment:
+      - GRPC_HOST=0.0.0.0
+      - GRPC_PORT=5050
+      - LOG_LVL=info
+      - STORAGE_HOST=post-service-storage
+      - STORAGE_PORT=5432
+      - STORAGE_USER=postgres
+      - STORAGE_PASSWORD=postgres
+      - POST_DB_NAME=postgres
+      - POST_TABLE_NAME=post
+      - HASHTAG_TABLE_NAME=hashtag
+      - HASHTAG_PER_POST_TABLE_NAME=hashtag_per_post
+    ports:
+      - "5050:5050"
+    networks:
+      - default-network
+
+  post-service-storage:
+    image: postgres:latest
+    container_name: post-service-storage
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 2s
+      timeout: 1s
+      retries: 5
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - ./docker-volumes/storage-data:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    ports:
+      - "5432:5432"
+    networks:
+      - default-network
