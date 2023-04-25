@@ -9,21 +9,21 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"gitlab.com/pet-pr-social-network/post-service/ppbapi"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
 	"gitlab.com/pet-pr-social-network/post-service/internal/api/mocks"
 
 	"gitlab.com/pet-pr-social-network/post-service/internal/model"
-	"gitlab.com/pet-pr-social-network/post-service/pbapi"
 )
 
 func TestAPI_GetHashtag(t *testing.T) {
 	tests := []struct {
 		name            string
 		mockStorage     func(t *testing.T) *mocks.Storage
-		req             *pbapi.GetHashtagRequest
-		expectedResp    *pbapi.GetHashtagResponse
+		req             *ppbapi.GetHashtagRequest
+		expectedResp    *ppbapi.GetHashtagResponse
 		wantErr         bool
 		expectedErr     error
 		expectedErrCode codes.Code
@@ -42,9 +42,9 @@ func TestAPI_GetHashtag(t *testing.T) {
 					Once()
 				return testStorage
 			},
-			req: &pbapi.GetHashtagRequest{Id: int64(1)},
-			expectedResp: &pbapi.GetHashtagResponse{
-				Hashtag: &pbapi.Hashtag{
+			req: &ppbapi.GetHashtagRequest{Id: int64(1)},
+			expectedResp: &ppbapi.GetHashtagResponse{
+				Hashtag: &ppbapi.Hashtag{
 					Id:   int64(1),
 					Name: "TestName",
 				},
@@ -60,9 +60,9 @@ func TestAPI_GetHashtag(t *testing.T) {
 					Once()
 				return testStorage
 			},
-			req:             &pbapi.GetHashtagRequest{Id: int64(1)},
+			req:             &ppbapi.GetHashtagRequest{Id: int64(1)},
 			wantErr:         true,
-			expectedErr:     pbapi.ErrHashtagNotFoundByID,
+			expectedErr:     ppbapi.ErrHashtagNotFoundByID,
 			expectedErrCode: codes.NotFound,
 		},
 		{
@@ -75,7 +75,7 @@ func TestAPI_GetHashtag(t *testing.T) {
 					Once()
 				return testStorage
 			},
-			req:             &pbapi.GetHashtagRequest{Id: int64(1)},
+			req:             &ppbapi.GetHashtagRequest{Id: int64(1)},
 			wantErr:         true,
 			expectedErr:     errors.New("unexpected"),
 			expectedErrCode: codes.Internal,

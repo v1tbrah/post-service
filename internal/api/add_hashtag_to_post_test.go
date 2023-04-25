@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"gitlab.com/pet-pr-social-network/post-service/internal/api/mocks"
-	"gitlab.com/pet-pr-social-network/post-service/pbapi"
+	"gitlab.com/pet-pr-social-network/post-service/ppbapi"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -18,14 +18,14 @@ func TestAPI_AddHashtagToPost(t *testing.T) {
 	tests := []struct {
 		name            string
 		mockStorage     func(t *testing.T) *mocks.Storage
-		req             *pbapi.AddHashtagToPostRequest
+		req             *ppbapi.AddHashtagToPostRequest
 		wantErr         bool
 		expectedErr     error
 		expectedErrCode codes.Code
 	}{
 		{
 			name: "OK",
-			req:  &pbapi.AddHashtagToPostRequest{PostID: 1, HashtagID: 1},
+			req:  &ppbapi.AddHashtagToPostRequest{PostID: 1, HashtagID: 1},
 			mockStorage: func(t *testing.T) *mocks.Storage {
 				testStorage := mocks.NewStorage(t)
 				testStorage.On("AddHashtagToPost",
@@ -37,7 +37,7 @@ func TestAPI_AddHashtagToPost(t *testing.T) {
 		},
 		{
 			name: "unexpected err on storage.AddHashtagToPost",
-			req:  &pbapi.AddHashtagToPostRequest{PostID: 1, HashtagID: 1},
+			req:  &ppbapi.AddHashtagToPostRequest{PostID: 1, HashtagID: 1},
 			mockStorage: func(t *testing.T) *mocks.Storage {
 				testStorage := mocks.NewStorage(t)
 				testStorage.On("AddHashtagToPost",

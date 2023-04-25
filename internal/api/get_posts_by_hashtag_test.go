@@ -9,28 +9,28 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"gitlab.com/pet-pr-social-network/post-service/ppbapi"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"gitlab.com/pet-pr-social-network/post-service/internal/api/mocks"
 	"gitlab.com/pet-pr-social-network/post-service/internal/model"
-	"gitlab.com/pet-pr-social-network/post-service/pbapi"
 )
 
 func TestAPI_GetPostsByHashtag(t *testing.T) {
 	tests := []struct {
 		name            string
 		mockStorage     func(t *testing.T) *mocks.Storage
-		req             *pbapi.GetPostsByHashtagRequest
-		expectedResp    *pbapi.GetPostsByHashtagResponse
+		req             *ppbapi.GetPostsByHashtagRequest
+		expectedResp    *ppbapi.GetPostsByHashtagResponse
 		wantErr         bool
 		expectedErr     error
 		expectedErrCode codes.Code
 	}{
 		{
 			name: "OK",
-			req:  &pbapi.GetPostsByHashtagRequest{HashtagID: 1, Direction: 0, PostOffsetID: 0, Limit: 10},
+			req:  &ppbapi.GetPostsByHashtagRequest{HashtagID: 1, Direction: 0, PostOffsetID: 0, Limit: 10},
 			mockStorage: func(t *testing.T) *mocks.Storage {
 				testStorage := mocks.NewStorage(t)
 				postsFromStorage := []model.Post{
@@ -55,8 +55,8 @@ func TestAPI_GetPostsByHashtag(t *testing.T) {
 					Once()
 				return testStorage
 			},
-			expectedResp: &pbapi.GetPostsByHashtagResponse{
-				Posts: []*pbapi.Post{
+			expectedResp: &ppbapi.GetPostsByHashtagResponse{
+				Posts: []*ppbapi.Post{
 					{
 						Id:          1,
 						UserID:      1,
@@ -76,7 +76,7 @@ func TestAPI_GetPostsByHashtag(t *testing.T) {
 		},
 		{
 			name: "unexpected err on storage.GetPostsByHashtag",
-			req:  &pbapi.GetPostsByHashtagRequest{HashtagID: 1, Direction: 0, PostOffsetID: 0, Limit: 10},
+			req:  &ppbapi.GetPostsByHashtagRequest{HashtagID: 1, Direction: 0, PostOffsetID: 0, Limit: 10},
 			mockStorage: func(t *testing.T) *mocks.Storage {
 				testStorage := mocks.NewStorage(t)
 				testStorage.On("GetPostsByHashtag",

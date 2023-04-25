@@ -10,21 +10,21 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"gitlab.com/pet-pr-social-network/post-service/ppbapi"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"gitlab.com/pet-pr-social-network/post-service/internal/api/mocks"
 	"gitlab.com/pet-pr-social-network/post-service/internal/model"
-	"gitlab.com/pet-pr-social-network/post-service/pbapi"
 )
 
 func TestAPI_GetPost(t *testing.T) {
 	tests := []struct {
 		name            string
 		mockStorage     func(t *testing.T) *mocks.Storage
-		req             *pbapi.GetPostRequest
-		expectedResp    *pbapi.GetPostResponse
+		req             *ppbapi.GetPostRequest
+		expectedResp    *ppbapi.GetPostResponse
 		wantErr         bool
 		expectedErr     error
 		expectedErrCode codes.Code
@@ -46,8 +46,8 @@ func TestAPI_GetPost(t *testing.T) {
 					Once()
 				return testStorage
 			},
-			req: &pbapi.GetPostRequest{Id: int64(1)},
-			expectedResp: &pbapi.GetPostResponse{
+			req: &ppbapi.GetPostRequest{Id: int64(1)},
+			expectedResp: &ppbapi.GetPostResponse{
 				UserID:      1,
 				Description: "TestDescription",
 				HashtagsID:  []int64{1, 2, 3},
@@ -64,9 +64,9 @@ func TestAPI_GetPost(t *testing.T) {
 					Once()
 				return testStorage
 			},
-			req:             &pbapi.GetPostRequest{Id: int64(1)},
+			req:             &ppbapi.GetPostRequest{Id: int64(1)},
 			wantErr:         true,
-			expectedErr:     pbapi.ErrPostNotFoundByID,
+			expectedErr:     ppbapi.ErrPostNotFoundByID,
 			expectedErrCode: codes.NotFound,
 		},
 		{
@@ -79,7 +79,7 @@ func TestAPI_GetPost(t *testing.T) {
 					Once()
 				return testStorage
 			},
-			req:             &pbapi.GetPostRequest{Id: int64(1)},
+			req:             &ppbapi.GetPostRequest{Id: int64(1)},
 			wantErr:         true,
 			expectedErr:     errors.New("unexpected"),
 			expectedErrCode: codes.Internal,

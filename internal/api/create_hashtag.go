@@ -6,22 +6,22 @@ import (
 	"strings"
 
 	"github.com/rs/zerolog/log"
+	"gitlab.com/pet-pr-social-network/post-service/ppbapi"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
 	"gitlab.com/pet-pr-social-network/post-service/internal/model"
 	"gitlab.com/pet-pr-social-network/post-service/internal/storage"
-	"gitlab.com/pet-pr-social-network/post-service/pbapi"
 )
 
-func (a *API) CreateHashtag(ctx context.Context, req *pbapi.CreateHashtagRequest) (*pbapi.CreateHashtagResponse, error) {
+func (a *API) CreateHashtag(ctx context.Context, req *ppbapi.CreateHashtagRequest) (*ppbapi.CreateHashtagResponse, error) {
 	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, pbapi.ErrEmptyRequest.Error())
+		return nil, status.Error(codes.InvalidArgument, ppbapi.ErrEmptyRequest.Error())
 	}
 
 	reqName := strings.TrimSpace(req.GetName())
 	if reqName == "" {
-		return nil, status.Error(codes.InvalidArgument, pbapi.ErrEmptyName.Error())
+		return nil, status.Error(codes.InvalidArgument, ppbapi.ErrEmptyName.Error())
 	}
 
 	id, err := a.storage.CreateHashtag(ctx, model.Hashtag{Name: reqName})
@@ -34,5 +34,5 @@ func (a *API) CreateHashtag(ctx context.Context, req *pbapi.CreateHashtagRequest
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	return &pbapi.CreateHashtagResponse{Id: id}, nil
+	return &ppbapi.CreateHashtagResponse{Id: id}, nil
 }

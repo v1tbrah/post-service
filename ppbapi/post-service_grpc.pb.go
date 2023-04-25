@@ -4,7 +4,7 @@
 // - protoc             v3.14.0
 // source: post-service.proto
 
-package pbapi
+package ppbapi
 
 import (
 	context "context"
@@ -19,12 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	PostService_CreatePost_FullMethodName        = "/pbapi.PostService/CreatePost"
-	PostService_GetPost_FullMethodName           = "/pbapi.PostService/GetPost"
-	PostService_GetPostsByHashtag_FullMethodName = "/pbapi.PostService/GetPostsByHashtag"
-	PostService_CreateHashtag_FullMethodName     = "/pbapi.PostService/CreateHashtag"
-	PostService_GetHashtag_FullMethodName        = "/pbapi.PostService/GetHashtag"
-	PostService_AddHashtagToPost_FullMethodName  = "/pbapi.PostService/AddHashtagToPost"
+	PostService_CreatePost_FullMethodName        = "/ppbapi.PostService/CreatePost"
+	PostService_GetPost_FullMethodName           = "/ppbapi.PostService/GetPost"
+	PostService_GetPostsByHashtag_FullMethodName = "/ppbapi.PostService/GetPostsByHashtag"
+	PostService_CreateHashtag_FullMethodName     = "/ppbapi.PostService/CreateHashtag"
+	PostService_GetHashtag_FullMethodName        = "/ppbapi.PostService/GetHashtag"
+	PostService_AddHashtagToPost_FullMethodName  = "/ppbapi.PostService/AddHashtagToPost"
 )
 
 // PostServiceClient is the client API for PostService service.
@@ -261,7 +261,7 @@ func _PostService_AddHashtagToPost_Handler(srv interface{}, ctx context.Context,
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var PostService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "pbapi.PostService",
+	ServiceName: "ppbapi.PostService",
 	HandlerType: (*PostServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
