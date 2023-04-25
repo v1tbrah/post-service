@@ -8,19 +8,19 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"gitlab.com/pet-pr-social-network/post-service/ppbapi"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
 	"gitlab.com/pet-pr-social-network/post-service/internal/api/mocks"
-	"gitlab.com/pet-pr-social-network/post-service/pbapi"
 )
 
 func TestAPI_CreateHashtag(t *testing.T) {
 	tests := []struct {
 		name            string
 		mockStorage     func(t *testing.T) *mocks.Storage
-		req             *pbapi.CreateHashtagRequest
-		expectedResp    *pbapi.CreateHashtagResponse
+		req             *ppbapi.CreateHashtagRequest
+		expectedResp    *ppbapi.CreateHashtagResponse
 		wantErr         bool
 		expectedErr     error
 		expectedErrCode codes.Code
@@ -35,21 +35,21 @@ func TestAPI_CreateHashtag(t *testing.T) {
 					Once()
 				return testStorage
 			},
-			req: &pbapi.CreateHashtagRequest{
+			req: &ppbapi.CreateHashtagRequest{
 				Name: "TestName",
 			},
-			expectedResp: &pbapi.CreateHashtagResponse{Id: int64(1)},
+			expectedResp: &ppbapi.CreateHashtagResponse{Id: int64(1)},
 		},
 		{
 			name: "empty name",
 			mockStorage: func(t *testing.T) *mocks.Storage {
 				return mocks.NewStorage(t)
 			},
-			req: &pbapi.CreateHashtagRequest{
+			req: &ppbapi.CreateHashtagRequest{
 				Name: "",
 			},
 			wantErr:         true,
-			expectedErr:     pbapi.ErrEmptyName,
+			expectedErr:     ppbapi.ErrEmptyName,
 			expectedErrCode: codes.InvalidArgument,
 		},
 		{
@@ -57,11 +57,11 @@ func TestAPI_CreateHashtag(t *testing.T) {
 			mockStorage: func(t *testing.T) *mocks.Storage {
 				return mocks.NewStorage(t)
 			},
-			req: &pbapi.CreateHashtagRequest{
+			req: &ppbapi.CreateHashtagRequest{
 				Name: "   ",
 			},
 			wantErr:         true,
-			expectedErr:     pbapi.ErrEmptyName,
+			expectedErr:     ppbapi.ErrEmptyName,
 			expectedErrCode: codes.InvalidArgument,
 		},
 		{
@@ -74,7 +74,7 @@ func TestAPI_CreateHashtag(t *testing.T) {
 					Once()
 				return testStorage
 			},
-			req: &pbapi.CreateHashtagRequest{
+			req: &ppbapi.CreateHashtagRequest{
 				Name: "TestName",
 			},
 			wantErr:         true,

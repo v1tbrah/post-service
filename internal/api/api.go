@@ -8,17 +8,17 @@ import (
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/rs/zerolog/log"
+	"gitlab.com/pet-pr-social-network/post-service/ppbapi"
 
 	"google.golang.org/grpc"
 
 	"gitlab.com/pet-pr-social-network/post-service/config"
-	"gitlab.com/pet-pr-social-network/post-service/pbapi"
 )
 
 type API struct {
 	server  *grpc.Server
 	storage Storage
-	pbapi.UnimplementedPostServiceServer
+	ppbapi.UnimplementedPostServiceServer
 }
 
 func New(storage Storage) (newAPI *API) {
@@ -31,7 +31,7 @@ func New(storage Storage) (newAPI *API) {
 		storage: storage,
 	}
 
-	pbapi.RegisterPostServiceServer(newAPI.server, newAPI)
+	ppbapi.RegisterPostServiceServer(newAPI.server, newAPI)
 
 	return newAPI
 }

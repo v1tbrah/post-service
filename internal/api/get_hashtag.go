@@ -6,25 +6,24 @@ import (
 	"errors"
 
 	"github.com/rs/zerolog/log"
+	"gitlab.com/pet-pr-social-network/post-service/ppbapi"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-
-	"gitlab.com/pet-pr-social-network/post-service/pbapi"
 )
 
-func (a *API) GetHashtag(ctx context.Context, req *pbapi.GetHashtagRequest) (*pbapi.GetHashtagResponse, error) {
+func (a *API) GetHashtag(ctx context.Context, req *ppbapi.GetHashtagRequest) (*ppbapi.GetHashtagResponse, error) {
 	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, pbapi.ErrEmptyRequest.Error())
+		return nil, status.Error(codes.InvalidArgument, ppbapi.ErrEmptyRequest.Error())
 	}
 
 	hashtag, err := a.storage.GetHashtag(ctx, req.GetId())
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, status.Error(codes.NotFound, pbapi.ErrHashtagNotFoundByID.Error())
+			return nil, status.Error(codes.NotFound, ppbapi.ErrHashtagNotFoundByID.Error())
 		}
 		log.Err(err).Int64("id", req.GetId()).Msg("storage.GetHashtag")
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	return &pbapi.GetHashtagResponse{Hashtag: &pbapi.Hashtag{Id: hashtag.ID, Name: hashtag.Name}}, nil
+	return &ppbapi.GetHashtagResponse{Hashtag: &ppbapi.Hashtag{Id: hashtag.ID, Name: hashtag.Name}}, nil
 }
