@@ -1,5 +1,8 @@
 version: '3.8'
 
+volumes:
+  storage-data: {}
+
 networks:
   default-network:
     driver: bridge
@@ -11,6 +14,8 @@ services:
     depends_on:
       post-service-storage:
         condition: service_healthy
+      kafka:
+        condition: service_started
     build:
         dockerfile: Dockerfile
     environment:
@@ -25,6 +30,8 @@ services:
       - POST_TABLE_NAME=post
       - HASHTAG_TABLE_NAME=hashtag
       - HASHTAG_PER_POST_TABLE_NAME=hashtag_per_post
+      - KAFKA_HOST=kafka
+      - KAFKA_PORT=9092
     ports:
       - "5050:5050"
     networks:
@@ -42,10 +49,21 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     volumes:
-      - ./docker-volumes/storage-data:/var/lib/postgresql/data
-    expose:
-      - "5432"
-    ports:
-      - "5432:5432"
+      - storage-data:/var/lib/postgresql/data
+    networks:
+      - default-network
+
+  zookeeper:
+    hostname: zookeeper
+    image: wurstmeister/zookeeper:3.4.6
+    networks:
+      - default-network
+
+  kafka:
+    image: wurstmeister/kafka
+    env_file:
+      - config/kafka-variables.env
+    depends_on:
+      - zookeeper
     networks:
       - default-network

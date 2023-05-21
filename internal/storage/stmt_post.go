@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS %s
 
 type StmtPost struct {
 	stmtCreatePost *sql.Stmt
+	stmtDeletePost *sql.Stmt
 	stmtGetPost    *sql.Stmt
 }
 
@@ -32,6 +33,12 @@ func (sc *StmtPost) prepare(dbConn *sql.DB, postTableName string) (err error) {
 		return fmt.Errorf("prepare 'create post' stmt: %w", err)
 	}
 
+	const deletePost = `DELETE FROM %s WHERE id = $1;`
+
+	if sc.stmtDeletePost, err = dbConn.Prepare(fmt.Sprintf(deletePost, postTableName)); err != nil {
+		return fmt.Errorf("prepare 'delete post' stmt: %w", err)
+	}
+
 	const getPost = `
 		SELECT
 			post.id,
@@ -39,7 +46,7 @@ func (sc *StmtPost) prepare(dbConn *sql.DB, postTableName string) (err error) {
 			post.description,
 			post.created_at
 		FROM %s AS post
-		WHERE post.id = $1
+		WHERE post.id = $1;
 `
 
 	if sc.stmtGetPost, err = dbConn.Prepare(fmt.Sprintf(getPost, postTableName)); err != nil {

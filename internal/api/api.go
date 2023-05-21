@@ -16,19 +16,21 @@ import (
 )
 
 type API struct {
-	server  *grpc.Server
-	storage Storage
+	server    *grpc.Server
+	storage   Storage
+	msgSender PostMsgSender
 	ppbapi.UnimplementedPostServiceServer
 }
 
-func New(storage Storage) (newAPI *API) {
+func New(storage Storage, msgSender PostMsgSender) (newAPI *API) {
 	newAPI = &API{
 		server: grpc.NewServer(grpc.UnaryInterceptor(
 			grpc_middleware.ChainUnaryServer(
 				interceptorLog,
 			),
 		)),
-		storage: storage,
+		storage:   storage,
+		msgSender: msgSender,
 	}
 
 	ppbapi.RegisterPostServiceServer(newAPI.server, newAPI)

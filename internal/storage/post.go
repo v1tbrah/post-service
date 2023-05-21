@@ -42,6 +42,24 @@ func (s *Storage) CreatePost(ctx context.Context, post model.Post) (id int64, er
 	return id, nil
 }
 
+func (s *Storage) DeletePost(ctx context.Context, id int64) error {
+	res, err := s.stmtPost.stmtDeletePost.ExecContext(ctx, id)
+	if err != nil {
+		return fmt.Errorf("stmtDeletePost.ExecContext, id (%d): %w", id, err)
+	}
+
+	aff, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("get rows affected: %w", err)
+	}
+
+	if aff == 0 {
+		return ErrPostNotFoundByID
+	}
+
+	return nil
+}
+
 func (s *Storage) GetPost(ctx context.Context, id int64) (post model.Post, err error) {
 	row := s.stmtPost.stmtGetPost.QueryRowContext(ctx, id)
 	if err = row.Scan(&post.ID, &post.UserID, &post.Description, &post.CreatedAt); err != nil {

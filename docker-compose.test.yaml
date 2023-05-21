@@ -26,6 +26,7 @@ services:
       - CITY_TABLE_NAME=city_test
       - INTEREST_TABLE_NAME=interest_test
       - USER_PER_INTEREST_TABLE_NAME=user_per_interest_test
+      - KAFKA_ENABLE=false
     ports:
         - "6060:6060"
     networks:
@@ -42,8 +43,6 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-    ports:
-      - "5432:5432"
     expose:
       - "5432"
     networks:

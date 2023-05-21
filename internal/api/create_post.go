@@ -18,13 +18,15 @@ func (a *API) CreatePost(ctx context.Context, req *ppbapi.CreatePostRequest) (*p
 		return nil, status.Error(codes.InvalidArgument, ppbapi.ErrEmptyRequest.Error())
 	}
 
-	id, err := a.storage.CreatePost(ctx, model.Post{
-		UserID: req.GetUserID(), Description: req.GetDescription(), HashtagsID: req.GetHashtagsID(), CreatedAt: time.Now(),
-	})
+	post := model.Post{UserID: req.GetUserID(), Description: req.GetDescription(), HashtagsID: req.GetHashtagsID(), CreatedAt: time.Now()}
+	id, err := a.storage.CreatePost(ctx, post)
 	if err != nil {
 		log.Error().Err(err).Str("user", fmt.Sprintf("%+v", req)).Msg("storage.CreatePost")
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+
+	post.ID = id
+	go a.msgSender.SendMsgPostCreated(post)
 
 	return &ppbapi.CreatePostResponse{Id: id}, nil
 }
