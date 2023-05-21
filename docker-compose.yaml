@@ -15,7 +15,7 @@ services:
       post-service-storage:
         condition: service_healthy
       kafka:
-        condition: service_started
+        condition: service_healthy
     build:
         dockerfile: Dockerfile
     environment:
@@ -65,5 +65,11 @@ services:
       - config/kafka-variables.env
     depends_on:
       - zookeeper
+    healthcheck:
+      test: nc -z localhost 9092 || exit -1
+      start_period: 5s
+      interval: 5s
+      timeout: 10s
+      retries: 10
     networks:
       - default-network
