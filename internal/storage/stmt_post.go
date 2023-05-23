@@ -33,7 +33,7 @@ func (sc *StmtPost) prepare(dbConn *sql.DB, postTableName string) (err error) {
 		return fmt.Errorf("prepare 'create post' stmt: %w", err)
 	}
 
-	const deletePost = `DELETE FROM %s WHERE id = $1;`
+	const deletePost = `DELETE FROM %s WHERE id = $1 RETURNING user_id;`
 
 	if sc.stmtDeletePost, err = dbConn.Prepare(fmt.Sprintf(deletePost, postTableName)); err != nil {
 		return fmt.Errorf("prepare 'delete post' stmt: %w", err)

@@ -56,8 +56,7 @@ func TestStorage_CreatePost(t *testing.T) {
 }
 
 func TestStorage_DeletePost(t *testing.T) {
-	s := tHelperInitEmptyDB(t)
-
+	ctx := context.Background()
 	tests := []struct {
 		name  string
 		input model.Post
@@ -73,7 +72,7 @@ func TestStorage_DeletePost(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s = tHelperInitEmptyDB(t)
+			s := tHelperInitEmptyDB(t)
 
 			createPostStmt, err := s.dbConn.Prepare(fmt.Sprintf(`
 INSERT INTO %s (user_id, description, created_at)
@@ -89,8 +88,13 @@ VALUES ($1, $2, $3) RETURNING id
 				t.Fatalf("scan created post id: %v", err)
 			}
 
-			if err = s.DeletePost(context.Background(), id); err != nil {
+			deletedPostUserID, err := s.DeletePost(ctx, id)
+			if err != nil {
 				t.Fatalf("delete post: %v", err)
+			}
+
+			if deletedPostUserID != tt.input.UserID {
+				t.Fatalf("deleted post user id: %d != %d", deletedPostUserID, tt.input.UserID)
 			}
 
 			var count int64

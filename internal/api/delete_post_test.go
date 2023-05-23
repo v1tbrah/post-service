@@ -17,6 +17,7 @@ import (
 )
 
 func TestAPI_DeletePost(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name            string
 		mockStorage     func(t *testing.T) *mocks.Storage
@@ -32,7 +33,7 @@ func TestAPI_DeletePost(t *testing.T) {
 				testStorage := mocks.NewStorage(t)
 				testStorage.On("DeletePost",
 					mock.MatchedBy(func(ctx context.Context) bool { return true }), int64(1)).
-					Return(nil).
+					Return(int64(1), nil).
 					Once()
 				return testStorage
 			},
@@ -45,7 +46,7 @@ func TestAPI_DeletePost(t *testing.T) {
 				testStorage := mocks.NewStorage(t)
 				testStorage.On("DeletePost",
 					mock.MatchedBy(func(ctx context.Context) bool { return true }), int64(1)).
-					Return(storage.ErrPostNotFoundByID).
+					Return(int64(-1), storage.ErrPostNotFoundByID).
 					Once()
 				return testStorage
 			},
@@ -60,7 +61,7 @@ func TestAPI_DeletePost(t *testing.T) {
 				testStorage := mocks.NewStorage(t)
 				testStorage.On("DeletePost",
 					mock.MatchedBy(func(ctx context.Context) bool { return true }), int64(1)).
-					Return(errors.New("unexpected error")).
+					Return(int64(-1), errors.New("unexpected error")).
 					Once()
 				return testStorage
 			},
@@ -74,7 +75,7 @@ func TestAPI_DeletePost(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			var msgSender *msgsndr.Sender
 			a := &API{storage: tt.mockStorage(t), msgSender: msgSender}
-			_, err := a.DeletePost(context.Background(), tt.req)
+			_, err := a.DeletePost(ctx, tt.req)
 
 			if tt.wantErr {
 				assert.Error(t, err)

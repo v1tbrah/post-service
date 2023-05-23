@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/rs/zerolog/log"
@@ -42,22 +43,15 @@ func (s *Storage) CreatePost(ctx context.Context, post model.Post) (id int64, er
 	return id, nil
 }
 
-func (s *Storage) DeletePost(ctx context.Context, id int64) error {
-	res, err := s.stmtPost.stmtDeletePost.ExecContext(ctx, id)
-	if err != nil {
-		return fmt.Errorf("stmtDeletePost.ExecContext, id (%d): %w", id, err)
+func (s *Storage) DeletePost(ctx context.Context, id int64) (userID int64, err error) {
+	if err = s.stmtPost.stmtDeletePost.QueryRowContext(ctx, id).Scan(&userID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return -1, ErrPostNotFoundByID
+		}
+		return -1, fmt.Errorf("scan deleted post userID: %w", err)
 	}
 
-	aff, err := res.RowsAffected()
-	if err != nil {
-		return fmt.Errorf("get rows affected: %w", err)
-	}
-
-	if aff == 0 {
-		return ErrPostNotFoundByID
-	}
-
-	return nil
+	return userID, nil
 }
 
 func (s *Storage) GetPost(ctx context.Context, id int64) (post model.Post, err error) {

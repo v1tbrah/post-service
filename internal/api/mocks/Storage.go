@@ -77,17 +77,27 @@ func (_m *Storage) CreatePost(ctx context.Context, post model.Post) (int64, erro
 }
 
 // DeletePost provides a mock function with given fields: ctx, id
-func (_m *Storage) DeletePost(ctx context.Context, id int64) error {
+func (_m *Storage) DeletePost(ctx context.Context, id int64) (int64, error) {
 	ret := _m.Called(ctx, id)
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, int64) error); ok {
+	var r0 int64
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, int64) (int64, error)); ok {
+		return rf(ctx, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, int64) int64); ok {
 		r0 = rf(ctx, id)
 	} else {
-		r0 = ret.Error(0)
+		r0 = ret.Get(0).(int64)
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(context.Context, int64) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // GetHashtag provides a mock function with given fields: ctx, id

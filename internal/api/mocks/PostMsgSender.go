@@ -17,9 +17,9 @@ func (_m *PostMsgSender) SendMsgPostCreated(post model.Post) {
 	_m.Called(post)
 }
 
-// SendMsgPostDeleted provides a mock function with given fields: id
-func (_m *PostMsgSender) SendMsgPostDeleted(id int64) {
-	_m.Called(id)
+// SendMsgPostDeleted provides a mock function with given fields: id, userID
+func (_m *PostMsgSender) SendMsgPostDeleted(id int64, userID int64) {
+	_m.Called(id, userID)
 }
 
 type mockConstructorTestingTNewPostMsgSender interface {

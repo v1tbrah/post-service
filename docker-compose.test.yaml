@@ -27,8 +27,6 @@ services:
       - INTEREST_TABLE_NAME=interest_test
       - USER_PER_INTEREST_TABLE_NAME=user_per_interest_test
       - KAFKA_ENABLE=false
-    ports:
-        - "6060:6060"
     networks:
       - integration-tests
 
@@ -43,7 +41,5 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-    expose:
-      - "5432"
     networks:
       - integration-tests

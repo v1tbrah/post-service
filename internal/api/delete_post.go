@@ -16,7 +16,7 @@ func (a *API) DeletePost(ctx context.Context, req *ppbapi.DeletePostRequest) (*p
 		return nil, status.Error(codes.InvalidArgument, ppbapi.ErrEmptyRequest.Error())
 	}
 
-	err := a.storage.DeletePost(ctx, req.GetId())
+	userID, err := a.storage.DeletePost(ctx, req.GetId())
 	if err != nil {
 		if errors.Is(err, storage.ErrPostNotFoundByID) {
 			return nil, status.Error(codes.NotFound, ppbapi.ErrPostNotFoundByID.Error())
@@ -26,7 +26,7 @@ func (a *API) DeletePost(ctx context.Context, req *ppbapi.DeletePostRequest) (*p
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	go a.msgSender.SendMsgPostDeleted(req.GetId())
+	go a.msgSender.SendMsgPostDeleted(req.GetId(), userID)
 
 	return &ppbapi.Empty{}, nil
 }

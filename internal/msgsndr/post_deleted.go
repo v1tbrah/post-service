@@ -1,7 +1,7 @@
 package msgsndr
 
 import (
-	"encoding/binary"
+	"encoding/json"
 	"time"
 
 	"github.com/avast/retry-go"
@@ -13,16 +13,26 @@ const (
 	postDeleteRetryAttempts = 5
 )
 
-func (ms *Sender) SendMsgPostDeleted(id int64) {
+type MsgPostDeleted struct {
+	ID     int64
+	UserID int64
+}
+
+func (ms *Sender) SendMsgPostDeleted(id int64, userID int64) {
 	if ms == nil {
 		return
 	}
 
-	msgBody := make([]byte, 8)
-	binary.PutVarint(msgBody, id)
+	msg := MsgPostDeleted{ID: id, UserID: userID}
 
-	err := retry.Do(func() error {
-		_, err := ms.topicPostDeletedConn.Write(msgBody)
+	msgBody, err := json.Marshal(msg)
+	if err != nil {
+		log.Warn().Err(err).Interface("msg", msg).Msg("json.Marshal, msg")
+		return
+	}
+
+	err = retry.Do(func() error {
+		_, err = ms.topicPostDeletedConn.Write(msgBody)
 		return err
 	},
 		retry.Context(ms.liveCtx),
@@ -31,7 +41,7 @@ func (ms *Sender) SendMsgPostDeleted(id int64) {
 	)
 
 	if err != nil {
-		log.Warn().Err(err).Int64("id", id).Msg("topicPostDeletedConn.Write")
+		log.Warn().Err(err).Interface("msg", msg).Msg("topicPostDeletedConn.Write")
 		return
 	}
 }
