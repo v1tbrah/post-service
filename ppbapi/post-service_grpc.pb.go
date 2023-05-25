@@ -23,6 +23,7 @@ const (
 	PostService_DeletePost_FullMethodName        = "/ppbapi.PostService/DeletePost"
 	PostService_GetPost_FullMethodName           = "/ppbapi.PostService/GetPost"
 	PostService_GetPostsByHashtag_FullMethodName = "/ppbapi.PostService/GetPostsByHashtag"
+	PostService_GetPostsByUserID_FullMethodName  = "/ppbapi.PostService/GetPostsByUserID"
 	PostService_CreateHashtag_FullMethodName     = "/ppbapi.PostService/CreateHashtag"
 	PostService_GetHashtag_FullMethodName        = "/ppbapi.PostService/GetHashtag"
 	PostService_AddHashtagToPost_FullMethodName  = "/ppbapi.PostService/AddHashtagToPost"
@@ -36,6 +37,7 @@ type PostServiceClient interface {
 	DeletePost(ctx context.Context, in *DeletePostRequest, opts ...grpc.CallOption) (*Empty, error)
 	GetPost(ctx context.Context, in *GetPostRequest, opts ...grpc.CallOption) (*GetPostResponse, error)
 	GetPostsByHashtag(ctx context.Context, in *GetPostsByHashtagRequest, opts ...grpc.CallOption) (*GetPostsByHashtagResponse, error)
+	GetPostsByUserID(ctx context.Context, in *GetPostsByUserIDRequest, opts ...grpc.CallOption) (*GetPostsByUserIDResponse, error)
 	CreateHashtag(ctx context.Context, in *CreateHashtagRequest, opts ...grpc.CallOption) (*CreateHashtagResponse, error)
 	GetHashtag(ctx context.Context, in *GetHashtagRequest, opts ...grpc.CallOption) (*GetHashtagResponse, error)
 	AddHashtagToPost(ctx context.Context, in *AddHashtagToPostRequest, opts ...grpc.CallOption) (*Empty, error)
@@ -85,6 +87,15 @@ func (c *postServiceClient) GetPostsByHashtag(ctx context.Context, in *GetPostsB
 	return out, nil
 }
 
+func (c *postServiceClient) GetPostsByUserID(ctx context.Context, in *GetPostsByUserIDRequest, opts ...grpc.CallOption) (*GetPostsByUserIDResponse, error) {
+	out := new(GetPostsByUserIDResponse)
+	err := c.cc.Invoke(ctx, PostService_GetPostsByUserID_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *postServiceClient) CreateHashtag(ctx context.Context, in *CreateHashtagRequest, opts ...grpc.CallOption) (*CreateHashtagResponse, error) {
 	out := new(CreateHashtagResponse)
 	err := c.cc.Invoke(ctx, PostService_CreateHashtag_FullMethodName, in, out, opts...)
@@ -120,6 +131,7 @@ type PostServiceServer interface {
 	DeletePost(context.Context, *DeletePostRequest) (*Empty, error)
 	GetPost(context.Context, *GetPostRequest) (*GetPostResponse, error)
 	GetPostsByHashtag(context.Context, *GetPostsByHashtagRequest) (*GetPostsByHashtagResponse, error)
+	GetPostsByUserID(context.Context, *GetPostsByUserIDRequest) (*GetPostsByUserIDResponse, error)
 	CreateHashtag(context.Context, *CreateHashtagRequest) (*CreateHashtagResponse, error)
 	GetHashtag(context.Context, *GetHashtagRequest) (*GetHashtagResponse, error)
 	AddHashtagToPost(context.Context, *AddHashtagToPostRequest) (*Empty, error)
@@ -141,6 +153,9 @@ func (UnimplementedPostServiceServer) GetPost(context.Context, *GetPostRequest) 
 }
 func (UnimplementedPostServiceServer) GetPostsByHashtag(context.Context, *GetPostsByHashtagRequest) (*GetPostsByHashtagResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPostsByHashtag not implemented")
+}
+func (UnimplementedPostServiceServer) GetPostsByUserID(context.Context, *GetPostsByUserIDRequest) (*GetPostsByUserIDResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPostsByUserID not implemented")
 }
 func (UnimplementedPostServiceServer) CreateHashtag(context.Context, *CreateHashtagRequest) (*CreateHashtagResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateHashtag not implemented")
@@ -236,6 +251,24 @@ func _PostService_GetPostsByHashtag_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PostService_GetPostsByUserID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPostsByUserIDRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostServiceServer).GetPostsByUserID(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PostService_GetPostsByUserID_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostServiceServer).GetPostsByUserID(ctx, req.(*GetPostsByUserIDRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _PostService_CreateHashtag_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateHashtagRequest)
 	if err := dec(in); err != nil {
@@ -312,6 +345,10 @@ var PostService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetPostsByHashtag",
 			Handler:    _PostService_GetPostsByHashtag_Handler,
+		},
+		{
+			MethodName: "GetPostsByUserID",
+			Handler:    _PostService_GetPostsByUserID_Handler,
 		},
 		{
 			MethodName: "CreateHashtag",
