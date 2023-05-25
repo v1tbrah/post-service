@@ -17,8 +17,9 @@ CREATE TABLE IF NOT EXISTS %s
 `
 
 type StmtPost struct {
-	stmtCreatePost *sql.Stmt
-	stmtGetPost    *sql.Stmt
+	stmtCreatePost       *sql.Stmt
+	stmtGetPost          *sql.Stmt
+	stmtGetPostsByUserID *sql.Stmt
 }
 
 func (sc *StmtPost) prepare(dbConn *sql.DB, postTableName string) (err error) {
@@ -44,6 +45,20 @@ func (sc *StmtPost) prepare(dbConn *sql.DB, postTableName string) (err error) {
 
 	if sc.stmtGetPost, err = dbConn.Prepare(fmt.Sprintf(getPost, postTableName)); err != nil {
 		return fmt.Errorf("prepare 'get post' stmt: %w", err)
+	}
+
+	const getPostsByUserID = `
+		SELECT
+			post.id,
+			post.user_id,
+			post.description,
+			post.created_at
+		FROM %s AS post
+		WHERE post.user_id = $1
+`
+
+	if sc.stmtGetPostsByUserID, err = dbConn.Prepare(fmt.Sprintf(getPostsByUserID, postTableName)); err != nil {
+		return fmt.Errorf("prepare 'get posts by user id' stmt: %w", err)
 	}
 
 	return nil

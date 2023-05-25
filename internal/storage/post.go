@@ -53,3 +53,20 @@ func (s *Storage) GetPost(ctx context.Context, id int64) (post model.Post, err e
 
 	return post, nil
 }
+
+func (s *Storage) GetPostsByUserID(ctx context.Context, userID int64) (posts []model.Post, err error) {
+	rows, err := s.stmtPost.stmtGetPostsByUserID.QueryContext(ctx, userID)
+	for rows.Next() {
+		var post model.Post
+		if err = rows.Scan(&post.ID, &post.UserID, &post.Description, &post.CreatedAt); err != nil {
+			return nil, fmt.Errorf("scan post: %w", err)
+		}
+		posts = append(posts, post)
+	}
+
+	if err = rows.Close(); err != nil {
+		return nil, fmt.Errorf("close rows: %w", err)
+	}
+
+	return posts, nil
+}

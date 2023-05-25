@@ -96,3 +96,94 @@ VALUES ($1, $2, $3) RETURNING id
 		})
 	}
 }
+
+func TestStorage_GetPostsByUserID(t *testing.T) {
+	ctx := context.Background()
+
+	tests := []struct {
+		name           string
+		userID         int64
+		input          []model.Post
+		expectedOutput []model.Post
+	}{
+		{
+			name:   "simple test",
+			userID: 1,
+			input: []model.Post{
+				{
+					UserID:      1,
+					Description: "testDescription",
+					CreatedAt:   time.Unix(10, 0).UTC(),
+				},
+			},
+			expectedOutput: []model.Post{
+				{
+					UserID:      1,
+					Description: "testDescription",
+					CreatedAt:   time.Unix(10, 0).UTC(),
+				},
+			},
+		},
+		{
+			name:   "2 on input user, one on another user",
+			userID: 1,
+			input: []model.Post{
+				{
+					UserID:      1,
+					Description: "testDescription",
+					CreatedAt:   time.Unix(10, 0).UTC(),
+				},
+				{
+					UserID:      1,
+					Description: "testDescription2",
+					CreatedAt:   time.Unix(20, 0).UTC(),
+				},
+				{
+					UserID:      2,
+					Description: "testDescription3",
+					CreatedAt:   time.Unix(30, 0).UTC(),
+				},
+			},
+			expectedOutput: []model.Post{
+				{
+					UserID:      1,
+					Description: "testDescription",
+					CreatedAt:   time.Unix(10, 0).UTC(),
+				},
+				{
+					UserID:      1,
+					Description: "testDescription2",
+					CreatedAt:   time.Unix(20, 0).UTC(),
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := tHelperInitEmptyDB(t)
+
+			for _, post := range tt.input {
+				createPostStmt, err := s.dbConn.Prepare(fmt.Sprintf(`
+INSERT INTO %s (user_id, description, created_at)
+VALUES ($1, $2, $3) RETURNING id
+`, s.cfg.PostTableName))
+				if err != nil {
+					t.Fatalf("prepare create post stmt: %v", err)
+				}
+				res := createPostStmt.QueryRow(post.UserID, post.Description, post.CreatedAt)
+				var id int64
+				if err = res.Scan(&id); err != nil {
+					t.Fatalf("scan created post id: %v", err)
+				}
+			}
+
+			postsFromDB, err := s.GetPostsByUserID(ctx, tt.userID)
+			for i := range postsFromDB {
+				postsFromDB[i].ID = 0 // for check equality with only input fields
+			}
+
+			require.NoError(t, err)
+			assert.Equal(t, tt.expectedOutput, postsFromDB)
+		})
+	}
+}

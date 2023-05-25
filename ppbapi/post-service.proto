@@ -10,6 +10,7 @@ service PostService {
   rpc CreatePost(CreatePostRequest) returns (CreatePostResponse) {}
   rpc GetPost(GetPostRequest) returns (GetPostResponse) {}
   rpc GetPostsByHashtag(GetPostsByHashtagRequest) returns (GetPostsByHashtagResponse) {}
+  rpc GetPostsByUserID(GetPostsByUserIDRequest) returns (GetPostsByUserIDResponse) {}
 
   rpc CreateHashtag(CreateHashtagRequest) returns (CreateHashtagResponse) {}
   rpc GetHashtag(GetHashtagRequest) returns (GetHashtagResponse) {}
@@ -54,6 +55,14 @@ message GetPostsByHashtagRequest {
 }
 
 message GetPostsByHashtagResponse {
+  repeated Post posts = 1;
+}
+
+message GetPostsByUserIDRequest {
+  int64 userID = 1;
+}
+
+message GetPostsByUserIDResponse {
   repeated Post posts = 1;
 }
 
