@@ -6,11 +6,11 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
-	"gitlab.com/pet-pr-social-network/post-service/ppbapi"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
 	"gitlab.com/pet-pr-social-network/post-service/internal/model"
+	"gitlab.com/pet-pr-social-network/post-service/ppbapi"
 )
 
 func (a *API) CreatePost(ctx context.Context, req *ppbapi.CreatePostRequest) (*ppbapi.CreatePostResponse, error) {

@@ -8,12 +8,13 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+
 	"gitlab.com/pet-pr-social-network/post-service/internal/api/mocks"
 	"gitlab.com/pet-pr-social-network/post-service/internal/msgsndr"
 	"gitlab.com/pet-pr-social-network/post-service/internal/storage"
 	"gitlab.com/pet-pr-social-network/post-service/ppbapi"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 func TestAPI_DeletePost(t *testing.T) {

@@ -6,12 +6,12 @@ import (
 	"strings"
 
 	"github.com/rs/zerolog/log"
-	"gitlab.com/pet-pr-social-network/post-service/ppbapi"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
 	"gitlab.com/pet-pr-social-network/post-service/internal/model"
 	"gitlab.com/pet-pr-social-network/post-service/internal/storage"
+	"gitlab.com/pet-pr-social-network/post-service/ppbapi"
 )
 
 func (a *API) CreateHashtag(ctx context.Context, req *ppbapi.CreateHashtagRequest) (*ppbapi.CreateHashtagResponse, error) {

@@ -10,6 +10,7 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+
 	"gitlab.com/pet-pr-social-network/post-service/config"
 	"gitlab.com/pet-pr-social-network/post-service/internal/api"
 	"gitlab.com/pet-pr-social-network/post-service/internal/msgsndr"

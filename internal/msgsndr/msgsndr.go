@@ -6,6 +6,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/segmentio/kafka-go"
+
 	"gitlab.com/pet-pr-social-network/post-service/config"
 )
 

@@ -8,11 +8,10 @@ import (
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/rs/zerolog/log"
-	"gitlab.com/pet-pr-social-network/post-service/ppbapi"
-
 	"google.golang.org/grpc"
 
 	"gitlab.com/pet-pr-social-network/post-service/config"
+	"gitlab.com/pet-pr-social-network/post-service/ppbapi"
 )
 
 type API struct {

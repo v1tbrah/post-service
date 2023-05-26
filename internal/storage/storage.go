@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
+
 	"gitlab.com/pet-pr-social-network/post-service/config"
 )
 

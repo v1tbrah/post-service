@@ -4,11 +4,12 @@ import (
 	"context"
 
 	"github.com/rs/zerolog/log"
-	"gitlab.com/pet-pr-social-network/post-service/internal/model"
-	"gitlab.com/pet-pr-social-network/post-service/ppbapi"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
+
+	"gitlab.com/pet-pr-social-network/post-service/internal/model"
+	"gitlab.com/pet-pr-social-network/post-service/ppbapi"
 )
 
 func (a *API) GetPostsByHashtag(ctx context.Context, req *ppbapi.GetPostsByHashtagRequest) (*ppbapi.GetPostsByHashtagResponse, error) {

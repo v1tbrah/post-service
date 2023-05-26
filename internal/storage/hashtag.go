@@ -6,6 +6,7 @@ import (
 
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
+
 	"gitlab.com/pet-pr-social-network/post-service/internal/model"
 )
 

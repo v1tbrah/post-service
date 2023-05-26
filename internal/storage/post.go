@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/rs/zerolog/log"
+
 	"gitlab.com/pet-pr-social-network/post-service/internal/model"
 )
 
