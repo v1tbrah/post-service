@@ -8,8 +8,10 @@ option go_package = "social_network/post-service/ppbapi";
 
 service PostService {
   rpc CreatePost(CreatePostRequest) returns (CreatePostResponse) {}
+  rpc DeletePost(DeletePostRequest) returns (Empty) {}
   rpc GetPost(GetPostRequest) returns (GetPostResponse) {}
   rpc GetPostsByHashtag(GetPostsByHashtagRequest) returns (GetPostsByHashtagResponse) {}
+  rpc GetPostsByUserID(GetPostsByUserIDRequest) returns (GetPostsByUserIDResponse) {}
 
   rpc CreateHashtag(CreateHashtagRequest) returns (CreateHashtagResponse) {}
   rpc GetHashtag(GetHashtagRequest) returns (GetHashtagResponse) {}
@@ -27,6 +29,10 @@ message CreatePostRequest {
 }
 
 message CreatePostResponse {
+  int64 id = 1;
+}
+
+message DeletePostRequest {
   int64 id = 1;
 }
 
@@ -54,6 +60,14 @@ message GetPostsByHashtagRequest {
 }
 
 message GetPostsByHashtagResponse {
+  repeated Post posts = 1;
+}
+
+message GetPostsByUserIDRequest {
+  int64 userID = 1;
+}
+
+message GetPostsByUserIDResponse {
   repeated Post posts = 1;
 }
 

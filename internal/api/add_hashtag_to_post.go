@@ -4,9 +4,10 @@ import (
 	"context"
 
 	"github.com/rs/zerolog/log"
-	"gitlab.com/pet-pr-social-network/post-service/ppbapi"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	"gitlab.com/pet-pr-social-network/post-service/ppbapi"
 )
 
 func (a *API) AddHashtagToPost(ctx context.Context, req *ppbapi.AddHashtagToPostRequest) (*ppbapi.Empty, error) {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 )
 
@@ -15,13 +16,16 @@ const (
 type Config struct {
 	GRPCConfig    GRPCConfig
 	StorageConfig StorageConfig
-	LogLvl        zerolog.Level
+	KafkaConfig   KafkaConfig
+
+	LogLvl zerolog.Level
 }
 
 func NewDefaultConfig() Config {
 	return Config{
 		GRPCConfig:    newDefaultGRPCConfig(),
 		StorageConfig: newDefaultStorageConfig(),
+		KafkaConfig:   newDefaultKafkaConfig(),
 		LogLvl:        defaultLogLvl,
 	}
 }
@@ -31,8 +35,10 @@ func (c *Config) ParseEnv() error {
 
 	c.StorageConfig.parseEnv()
 
+	c.KafkaConfig.parseEnv()
+
 	if err := c.parseEnvLogLvl(); err != nil {
-		return err
+		return errors.Wrapf(err, "parse log lvl")
 	}
 
 	return nil

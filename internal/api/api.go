@@ -8,27 +8,28 @@ import (
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/rs/zerolog/log"
-	"gitlab.com/pet-pr-social-network/post-service/ppbapi"
-
 	"google.golang.org/grpc"
 
 	"gitlab.com/pet-pr-social-network/post-service/config"
+	"gitlab.com/pet-pr-social-network/post-service/ppbapi"
 )
 
 type API struct {
-	server  *grpc.Server
-	storage Storage
+	server    *grpc.Server
+	storage   Storage
+	msgSender PostMsgSender
 	ppbapi.UnimplementedPostServiceServer
 }
 
-func New(storage Storage) (newAPI *API) {
+func New(storage Storage, msgSender PostMsgSender) (newAPI *API) {
 	newAPI = &API{
 		server: grpc.NewServer(grpc.UnaryInterceptor(
 			grpc_middleware.ChainUnaryServer(
 				interceptorLog,
 			),
 		)),
-		storage: storage,
+		storage:   storage,
+		msgSender: msgSender,
 	}
 
 	ppbapi.RegisterPostServiceServer(newAPI.server, newAPI)

@@ -2,4 +2,7 @@ package storage
 
 import "errors"
 
-var ErrHashtagAlreadyExists = errors.New("hashtag already exists")
+var (
+	ErrPostNotFoundByID     = errors.New("post not found by id")
+	ErrHashtagAlreadyExists = errors.New("hashtag already exists")
+)

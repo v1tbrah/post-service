@@ -8,18 +8,17 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"gitlab.com/pet-pr-social-network/post-service/internal/model"
 	"gitlab.com/pet-pr-social-network/post-service/ppbapi"
 )
 
-func (a *API) GetPostsByHashtag(ctx context.Context, req *ppbapi.GetPostsByHashtagRequest) (*ppbapi.GetPostsByHashtagResponse, error) {
+func (a *API) GetPostsByUserID(ctx context.Context, req *ppbapi.GetPostsByUserIDRequest) (*ppbapi.GetPostsByUserIDResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, ppbapi.ErrEmptyRequest.Error())
 	}
 
-	posts, err := a.storage.GetPostsByHashtag(ctx, req.GetHashtagID(), model.Direction(req.GetDirection()), req.GetPostOffsetID(), req.GetLimit())
+	posts, err := a.storage.GetPostsByUserID(ctx, req.GetUserID())
 	if err != nil {
-		log.Err(err).Msg("storage.GetPostsByHashtag")
+		log.Err(err).Msg("storage.GetPostsByUserID")
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
@@ -34,5 +33,5 @@ func (a *API) GetPostsByHashtag(ctx context.Context, req *ppbapi.GetPostsByHasht
 		})
 	}
 
-	return &ppbapi.GetPostsByHashtagResponse{Posts: res}, nil
+	return &ppbapi.GetPostsByUserIDResponse{Posts: res}, nil
 }

@@ -17,8 +17,10 @@ CREATE TABLE IF NOT EXISTS %s
 `
 
 type StmtPost struct {
-	stmtCreatePost *sql.Stmt
-	stmtGetPost    *sql.Stmt
+	stmtCreatePost       *sql.Stmt
+	stmtDeletePost       *sql.Stmt
+	stmtGetPost          *sql.Stmt
+	stmtGetPostsByUserID *sql.Stmt
 }
 
 func (sc *StmtPost) prepare(dbConn *sql.DB, postTableName string) (err error) {
@@ -32,6 +34,12 @@ func (sc *StmtPost) prepare(dbConn *sql.DB, postTableName string) (err error) {
 		return fmt.Errorf("prepare 'create post' stmt: %w", err)
 	}
 
+	const deletePost = `DELETE FROM %s WHERE id = $1 RETURNING user_id;`
+
+	if sc.stmtDeletePost, err = dbConn.Prepare(fmt.Sprintf(deletePost, postTableName)); err != nil {
+		return fmt.Errorf("prepare 'delete post' stmt: %w", err)
+	}
+
 	const getPost = `
 		SELECT
 			post.id,
@@ -39,11 +47,25 @@ func (sc *StmtPost) prepare(dbConn *sql.DB, postTableName string) (err error) {
 			post.description,
 			post.created_at
 		FROM %s AS post
-		WHERE post.id = $1
+		WHERE post.id = $1;
 `
 
 	if sc.stmtGetPost, err = dbConn.Prepare(fmt.Sprintf(getPost, postTableName)); err != nil {
 		return fmt.Errorf("prepare 'get post' stmt: %w", err)
+	}
+
+	const getPostsByUserID = `
+		SELECT
+			post.id,
+			post.user_id,
+			post.description,
+			post.created_at
+		FROM %s AS post
+		WHERE post.user_id = $1
+`
+
+	if sc.stmtGetPostsByUserID, err = dbConn.Prepare(fmt.Sprintf(getPostsByUserID, postTableName)); err != nil {
+		return fmt.Errorf("prepare 'get posts by user id' stmt: %w", err)
 	}
 
 	return nil

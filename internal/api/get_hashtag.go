@@ -6,9 +6,10 @@ import (
 	"errors"
 
 	"github.com/rs/zerolog/log"
-	"gitlab.com/pet-pr-social-network/post-service/ppbapi"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	"gitlab.com/pet-pr-social-network/post-service/ppbapi"
 )
 
 func (a *API) GetHashtag(ctx context.Context, req *ppbapi.GetHashtagRequest) (*ppbapi.GetHashtagResponse, error) {

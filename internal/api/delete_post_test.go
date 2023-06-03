@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"testing"
 
@@ -13,16 +12,18 @@ import (
 	"google.golang.org/grpc/status"
 
 	"gitlab.com/pet-pr-social-network/post-service/internal/api/mocks"
-	"gitlab.com/pet-pr-social-network/post-service/internal/model"
+	"gitlab.com/pet-pr-social-network/post-service/internal/msgsndr"
+	"gitlab.com/pet-pr-social-network/post-service/internal/storage"
 	"gitlab.com/pet-pr-social-network/post-service/ppbapi"
 )
 
-func TestAPI_GetHashtag(t *testing.T) {
+func TestAPI_DeletePost(t *testing.T) {
+	ctx := context.Background()
 	tests := []struct {
 		name            string
 		mockStorage     func(t *testing.T) *mocks.Storage
-		req             *ppbapi.GetHashtagRequest
-		expectedResp    *ppbapi.GetHashtagResponse
+		req             *ppbapi.DeletePostRequest
+		expectedResp    *ppbapi.Empty
 		wantErr         bool
 		expectedErr     error
 		expectedErrCode codes.Code
@@ -31,59 +32,51 @@ func TestAPI_GetHashtag(t *testing.T) {
 			name: "OK",
 			mockStorage: func(t *testing.T) *mocks.Storage {
 				testStorage := mocks.NewStorage(t)
-				hashtagFromStorage := model.Hashtag{
-					ID:   1,
-					Name: "TestName",
-				}
-				testStorage.On("GetHashtag",
+				testStorage.On("DeletePost",
 					mock.MatchedBy(func(ctx context.Context) bool { return true }), int64(1)).
-					Return(hashtagFromStorage, nil).
+					Return(int64(1), nil).
 					Once()
 				return testStorage
 			},
-			req: &ppbapi.GetHashtagRequest{Id: int64(1)},
-			expectedResp: &ppbapi.GetHashtagResponse{
-				Hashtag: &ppbapi.Hashtag{
-					Id:   int64(1),
-					Name: "TestName",
-				},
-			},
+			req:          &ppbapi.DeletePostRequest{Id: int64(1)},
+			expectedResp: &ppbapi.Empty{},
 		},
 		{
 			name: "not found",
 			mockStorage: func(t *testing.T) *mocks.Storage {
 				testStorage := mocks.NewStorage(t)
-				testStorage.On("GetHashtag",
+				testStorage.On("DeletePost",
 					mock.MatchedBy(func(ctx context.Context) bool { return true }), int64(1)).
-					Return(model.Hashtag{}, sql.ErrNoRows).
+					Return(int64(-1), storage.ErrPostNotFoundByID).
 					Once()
 				return testStorage
 			},
-			req:             &ppbapi.GetHashtagRequest{Id: int64(1)},
+			req:             &ppbapi.DeletePostRequest{Id: int64(1)},
 			wantErr:         true,
-			expectedErr:     ppbapi.ErrHashtagNotFoundByID,
+			expectedErr:     ppbapi.ErrPostNotFoundByID,
 			expectedErrCode: codes.NotFound,
 		},
 		{
-			name: "unexpected err on storage.GetHashtag",
+			name: "unexpected err on storage.DeletePost",
 			mockStorage: func(t *testing.T) *mocks.Storage {
 				testStorage := mocks.NewStorage(t)
-				testStorage.On("GetHashtag",
+				testStorage.On("DeletePost",
 					mock.MatchedBy(func(ctx context.Context) bool { return true }), int64(1)).
-					Return(model.Hashtag{}, errors.New("unexpected err")).
+					Return(int64(-1), errors.New("unexpected error")).
 					Once()
 				return testStorage
 			},
-			req:             &ppbapi.GetHashtagRequest{Id: int64(1)},
+			req:             &ppbapi.DeletePostRequest{Id: int64(1)},
 			wantErr:         true,
-			expectedErr:     errors.New("unexpected"),
+			expectedErr:     errors.New("unexpected error"),
 			expectedErrCode: codes.Internal,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			a := &API{storage: tt.mockStorage(t)}
-			resp, err := a.GetHashtag(context.Background(), tt.req)
+			var msgSender *msgsndr.Sender
+			a := &API{storage: tt.mockStorage(t), msgSender: msgSender}
+			_, err := a.DeletePost(ctx, tt.req)
 
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -93,7 +86,6 @@ func TestAPI_GetHashtag(t *testing.T) {
 
 			if !tt.wantErr {
 				require.NoError(t, err)
-				assert.Equal(t, tt.expectedResp, resp)
 			}
 		})
 	}

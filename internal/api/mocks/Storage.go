@@ -76,6 +76,30 @@ func (_m *Storage) CreatePost(ctx context.Context, post model.Post) (int64, erro
 	return r0, r1
 }
 
+// DeletePost provides a mock function with given fields: ctx, id
+func (_m *Storage) DeletePost(ctx context.Context, id int64) (int64, error) {
+	ret := _m.Called(ctx, id)
+
+	var r0 int64
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, int64) (int64, error)); ok {
+		return rf(ctx, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, int64) int64); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Get(0).(int64)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, int64) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetHashtag provides a mock function with given fields: ctx, id
 func (_m *Storage) GetHashtag(ctx context.Context, id int64) (model.Hashtag, error) {
 	ret := _m.Called(ctx, id)
@@ -143,6 +167,32 @@ func (_m *Storage) GetPostsByHashtag(ctx context.Context, hashtagID int64, direc
 
 	if rf, ok := ret.Get(1).(func(context.Context, int64, model.Direction, int64, int64) error); ok {
 		r1 = rf(ctx, hashtagID, direction, postOffsetID, limit)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetPostsByUserID provides a mock function with given fields: ctx, userID
+func (_m *Storage) GetPostsByUserID(ctx context.Context, userID int64) ([]model.Post, error) {
+	ret := _m.Called(ctx, userID)
+
+	var r0 []model.Post
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, int64) ([]model.Post, error)); ok {
+		return rf(ctx, userID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, int64) []model.Post); ok {
+		r0 = rf(ctx, userID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]model.Post)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, int64) error); ok {
+		r1 = rf(ctx, userID)
 	} else {
 		r1 = ret.Error(1)
 	}
