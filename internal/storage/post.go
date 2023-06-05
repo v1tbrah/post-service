@@ -12,7 +12,7 @@ import (
 )
 
 func (s *Storage) CreatePost(ctx context.Context, post model.Post) (id int64, err error) {
-	tx, err := s.dbConn.Begin()
+	tx, err := s.db.Begin()
 	if err != nil {
 		return -1, err
 	}
@@ -23,7 +23,7 @@ func (s *Storage) CreatePost(ctx context.Context, post model.Post) (id int64, er
 		}
 	}()
 
-	row := tx.Stmt(s.stmtPost.stmtCreatePost).QueryRowContext(ctx, post.UserID, post.Description, post.CreatedAt)
+	row := tx.Stmt(s.post.create).QueryRowContext(ctx, post.UserID, post.Description, post.CreatedAt)
 	if err = row.Scan(&id); err != nil {
 		return -1, fmt.Errorf("scan created post id: %w", err)
 	}
@@ -32,7 +32,7 @@ func (s *Storage) CreatePost(ctx context.Context, post model.Post) (id int64, er
 	}
 
 	for _, hid := range post.HashtagsID {
-		if _, err = tx.Stmt(s.stmtHashtagPerPost.stmtAddHashtagToPost).Exec(id, hid); err != nil {
+		if _, err = tx.Stmt(s.hashtagPerPost.addHashtagToPost).Exec(id, hid); err != nil {
 			return -1, fmt.Errorf("add hashtag (%d) to post: %w", hid, err)
 		}
 	}
@@ -45,7 +45,7 @@ func (s *Storage) CreatePost(ctx context.Context, post model.Post) (id int64, er
 }
 
 func (s *Storage) DeletePost(ctx context.Context, id int64) (userID int64, err error) {
-	if err = s.stmtPost.stmtDeletePost.QueryRowContext(ctx, id).Scan(&userID); err != nil {
+	if err = s.post.delete.QueryRowContext(ctx, id).Scan(&userID); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return -1, ErrPostNotFoundByID
 		}
@@ -56,7 +56,7 @@ func (s *Storage) DeletePost(ctx context.Context, id int64) (userID int64, err e
 }
 
 func (s *Storage) GetPost(ctx context.Context, id int64) (post model.Post, err error) {
-	row := s.stmtPost.stmtGetPost.QueryRowContext(ctx, id)
+	row := s.post.get.QueryRowContext(ctx, id)
 	if err = row.Scan(&post.ID, &post.UserID, &post.Description, &post.CreatedAt); err != nil {
 		return post, fmt.Errorf("scan get post by id: %w", err)
 	}
@@ -68,7 +68,7 @@ func (s *Storage) GetPost(ctx context.Context, id int64) (post model.Post, err e
 }
 
 func (s *Storage) GetPostsByUserID(ctx context.Context, userID int64) (posts []model.Post, err error) {
-	rows, err := s.stmtPost.stmtGetPostsByUserID.QueryContext(ctx, userID)
+	rows, err := s.post.getListByUserID.QueryContext(ctx, userID)
 	for rows.Next() {
 		var post model.Post
 		if err = rows.Scan(&post.ID, &post.UserID, &post.Description, &post.CreatedAt); err != nil {

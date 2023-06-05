@@ -1,7 +1,7 @@
 version: '3.8'
 
 volumes:
-  storage-data: {}
+  post-storage: {}
 
 networks:
   default-network:
@@ -12,8 +12,8 @@ services:
   post-service:
     container_name: post-service
     depends_on:
-      post-service-storage:
-        condition: service_healthy
+      post-service-storage-migrate:
+        condition: service_completed_successfully
       kafka:
         condition: service_healthy
     build:
@@ -25,11 +25,8 @@ services:
       - STORAGE_HOST=post-service-storage
       - STORAGE_PORT=5432
       - STORAGE_USER=postgres
-      - STORAGE_PASSWORD=postgres
-      - POST_DB_NAME=postgres
-      - POST_TABLE_NAME=post
-      - HASHTAG_TABLE_NAME=hashtag
-      - HASHTAG_PER_POST_TABLE_NAME=hashtag_per_post
+      - STORAGE_PASSWORD=password
+      - POST_DB_NAME=posts
       - KAFKA_HOST=kafka
       - KAFKA_PORT=9092
     ports:
@@ -38,7 +35,7 @@ services:
       - default-network
 
   post-service-storage:
-    image: postgres:latest
+    image: postgres:alpine
     container_name: post-service-storage
     healthcheck:
       test: ["CMD-SHELL", "pg_isready"]
@@ -47,9 +44,22 @@ services:
       retries: 5
     environment:
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_PASSWORD=password
     volumes:
-      - storage-data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - post-storage:/var/lib/postgresql/data
+    networks:
+      - default-network
+
+  post-service-storage-migrate:
+    image: migrate/migrate:v4.15.2 # Image page: <https://hub.docker.com/r/migrate/migrate>
+    container_name: post-service-storage-migrate
+    volumes: [ .:/src:ro ]
+    working_dir: /src
+    entrypoint: migrate -database "postgres://postgres:password@post-service-storage:5432/posts?sslmode=disable" -source file://./migrations -verbose up
+    depends_on:
+      post-service-storage:
+        condition: service_healthy
     networks:
       - default-network
 
