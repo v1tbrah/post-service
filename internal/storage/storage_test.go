@@ -3,7 +3,6 @@
 package storage
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/rs/zerolog"
@@ -21,19 +20,22 @@ func TestStorage_Init(t *testing.T) {
 	}
 	zerolog.SetGlobalLevel(cfg.LogLvl)
 
-	s := tHelperInitEmptyDB(t)
-
-	// DROP TABLES TO CHECK THEIR EXISTENCE AFTER REINITIALIZATION
-	if _, err := s.dbConn.Exec(fmt.Sprintf("DROP TABLE %s CASCADE", cfg.StorageConfig.PostTableName)); err != nil {
-		t.Fatalf("drop table post: %s", err)
+	s, err := Init(cfg.Storage)
+	if err != nil {
+		t.Fatalf("init storage: %v", err)
 	}
 
-	if _, err := s.dbConn.Exec(fmt.Sprintf("DROP TABLE %s CASCADE", cfg.StorageConfig.HashtagTableName)); err != nil {
-		t.Fatalf("drop table hashtag: %s", err)
+	// CHECK EXISTENCE AFTER INITIALIZATION
+	if _, err = s.db.Query("SELECT 1 FROM table_post"); err != nil {
+		t.Fatalf("select from table post: %v", err)
 	}
 
-	if _, err := s.dbConn.Exec(fmt.Sprintf("DROP TABLE %s CASCADE", cfg.StorageConfig.HashtagPerPostTableName)); err != nil {
-		t.Fatalf("drop table hashtag per post: %s", err)
+	if _, err = s.db.Query("SELECT 1 FROM table_hashtag"); err != nil {
+		t.Fatalf("select from table hashtag: %v", err)
+	}
+
+	if _, err = s.db.Query("SELECT 1 FROM table_hashtag_per_post"); err != nil {
+		t.Fatalf("select from table hashtag per post: %v", err)
 	}
 }
 
@@ -46,27 +48,22 @@ func tHelperInitEmptyDB(t *testing.T) *Storage {
 	}
 	zerolog.SetGlobalLevel(cfg.LogLvl)
 
-	s, err := Init(cfg.StorageConfig)
+	s, err := Init(cfg.Storage)
 	if err != nil {
 		t.Fatalf("init storage: %v", err)
 	}
 
-	// DROP TABLES IF THEY ALREADY EXIST
-	if _, err = s.dbConn.Exec(fmt.Sprintf("DROP TABLE IF EXISTS %s CASCADE", s.cfg.PostTableName)); err != nil {
-		t.Fatalf("drop table post: %s", err)
+	// DELETE FROM TABLES FOR CLEAR TEST SPACE
+	if _, err = s.db.Query("DELETE FROM table_hashtag_per_post CASCADE"); err != nil {
+		t.Fatalf("delete from table hashtag per post: %v", err)
 	}
 
-	if _, err = s.dbConn.Exec(fmt.Sprintf("DROP TABLE IF EXISTS %s CASCADE", s.cfg.HashtagTableName)); err != nil {
-		t.Fatalf("drop table hashtag: %s", err)
+	if _, err = s.db.Query("DELETE FROM table_post CASCADE"); err != nil {
+		t.Fatalf("delete from table post: %v", err)
 	}
 
-	if _, err = s.dbConn.Exec(fmt.Sprintf("DROP TABLE IF EXISTS %s CASCADE", s.cfg.HashtagPerPostTableName)); err != nil {
-		t.Fatalf("drop table hashtag per post: %s", err)
-	}
-
-	// REINIT
-	if s, err = Init(cfg.StorageConfig); err != nil {
-		t.Fatalf("init storage after drop tables: %v", err)
+	if _, err = s.db.Query("DELETE FROM table_hashtag CASCADE"); err != nil {
+		t.Fatalf("delete from table hashtag: %v", err)
 	}
 
 	return s

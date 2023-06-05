@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -28,16 +27,16 @@ func main() {
 
 	ctxStart, ctxStartCancel := context.WithCancel(context.Background())
 
-	newStorage, err := storage.Init(newConfig.StorageConfig)
+	newStorage, err := storage.Init(newConfig.Storage)
 	if err != nil {
-		log.Fatal().Err(err).Str("config", fmt.Sprintf("%+v", newConfig.StorageConfig)).Msg("storage.Init")
+		log.Fatal().Err(err).Interface("config", newConfig.Storage).Msg("storage.Init")
 	} else {
 		log.Info().Msg("storage initialized")
 	}
 
-	newMsgSender, err := msgsndr.New(ctxStart, newConfig.KafkaConfig)
+	newMsgSender, err := msgsndr.New(ctxStart, newConfig.Kafka)
 	if err != nil {
-		log.Fatal().Err(err).Interface("config", newConfig.KafkaConfig).Msg("msgsndr.New")
+		log.Fatal().Err(err).Interface("config", newConfig.Kafka).Msg("msgsndr.New")
 	} else {
 		log.Info().Msg("message sender initialized")
 	}
@@ -49,7 +48,7 @@ func main() {
 
 	errServingCh := make(chan error)
 	go func() {
-		errServing := newAPI.StartServing(ctxStart, newConfig.GRPCConfig, shutdownSig)
+		errServing := newAPI.StartServing(ctxStart, newConfig.GRPC, shutdownSig)
 		errServingCh <- errServing
 	}()
 

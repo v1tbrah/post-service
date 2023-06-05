@@ -16,6 +16,8 @@ import (
 )
 
 func TestStorage_AddHashtagToPost(t *testing.T) {
+	ctx := context.Background()
+
 	s := tHelperInitEmptyDB(t)
 
 	tests := []struct {
@@ -39,17 +41,16 @@ func TestStorage_AddHashtagToPost(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			s = tHelperInitEmptyDB(t)
 
-			postID, err := s.CreatePost(context.Background(), tt.post)
+			postID, err := s.CreatePost(ctx, tt.post)
 			require.NoError(t, err)
 
-			hashtagID, err := s.CreateHashtag(context.Background(), tt.hashtag)
+			hashtagID, err := s.CreateHashtag(ctx, tt.hashtag)
 			require.NoError(t, err)
 
-			err = s.AddHashtagToPost(context.Background(), postID, hashtagID)
+			err = s.AddHashtagToPost(ctx, postID, hashtagID)
 			require.NoError(t, err)
 
-			row := s.dbConn.QueryRow(fmt.Sprintf("SELECT post_id, hashtag_id FROM %s WHERE post_id=%d AND hashtag_id=%d",
-				s.cfg.HashtagPerPostTableName, postID, hashtagID))
+			row := s.db.QueryRow(fmt.Sprintf("SELECT post_id, hashtag_id FROM table_hashtag_per_post WHERE post_id=%d AND hashtag_id=%d", postID, hashtagID))
 			var postIDFromDB, hashtagIDFromDB int64
 			if err = row.Scan(&postIDFromDB, &hashtagIDFromDB); err != nil {
 				t.Fatalf("scan: %v", err)
@@ -69,6 +70,8 @@ func TestStorage_GetPostsByHashtag(t *testing.T) {
 	// get next 60 by hashtag 'forSearch'
 	// get prev 20 by hashtag 'forSearch'
 
+	ctx := context.Background()
+
 	s := tHelperInitEmptyDB(t)
 
 	var tmpForSearch, tmpNotForSearch model.Post
@@ -79,9 +82,9 @@ func TestStorage_GetPostsByHashtag(t *testing.T) {
 		Name: "notForSearch",
 	}
 
-	hashForSearchID, err := s.CreateHashtag(context.Background(), hashForSearch)
+	hashForSearchID, err := s.CreateHashtag(ctx, hashForSearch)
 	require.NoError(t, err)
-	hashNotForSearchID, err := s.CreateHashtag(context.Background(), hashNotForSearch)
+	hashNotForSearchID, err := s.CreateHashtag(ctx, hashNotForSearch)
 	require.NoError(t, err)
 
 	var tmpForSearchID, tmpNotForSearchID int64
@@ -90,44 +93,44 @@ func TestStorage_GetPostsByHashtag(t *testing.T) {
 			UserID:      1,
 			Description: strconv.Itoa(i + 1),
 		}
-		tmpForSearchID, err = s.CreatePost(context.Background(), tmpForSearch)
+		tmpForSearchID, err = s.CreatePost(ctx, tmpForSearch)
 		require.NoError(t, err)
 
 		tmpNotForSearch = model.Post{
 			UserID:      1,
 			Description: strconv.Itoa(-(i + 1)),
 		}
-		tmpNotForSearchID, err = s.CreatePost(context.Background(), tmpNotForSearch)
+		tmpNotForSearchID, err = s.CreatePost(ctx, tmpNotForSearch)
 		require.NoError(t, err)
 
-		err = s.AddHashtagToPost(context.Background(), tmpForSearchID, hashForSearchID)
+		err = s.AddHashtagToPost(ctx, tmpForSearchID, hashForSearchID)
 		require.NoError(t, err)
-		err = s.AddHashtagToPost(context.Background(), tmpNotForSearchID, hashNotForSearchID)
+		err = s.AddHashtagToPost(ctx, tmpNotForSearchID, hashNotForSearchID)
 		require.NoError(t, err)
 	}
 
-	first20, err := s.GetPostsByHashtag(context.Background(), hashForSearchID, model.First, 0, 20)
+	first20, err := s.GetPostsByHashtag(ctx, hashForSearchID, model.First, 0, 20)
 	require.NoError(t, err)
 	for i := 0; i < len(first20); i++ {
 		require.Equal(t, strconv.Itoa(i+1), first20[i].Description)
 	}
 
 	currLast := first20[len(first20)-1]
-	next20, err := s.GetPostsByHashtag(context.Background(), hashForSearchID, model.Next, currLast.ID, 20)
+	next20, err := s.GetPostsByHashtag(ctx, hashForSearchID, model.Next, currLast.ID, 20)
 	require.NoError(t, err)
 	for i := 0; i < len(next20); i++ {
 		require.Equal(t, strconv.Itoa(i+1+len(first20)), next20[i].Description)
 	}
 
 	currLast = next20[len(next20)-1]
-	next60, err := s.GetPostsByHashtag(context.Background(), hashForSearchID, model.Next, currLast.ID, 60)
+	next60, err := s.GetPostsByHashtag(ctx, hashForSearchID, model.Next, currLast.ID, 60)
 	require.NoError(t, err)
 	for i := 0; i < len(next60); i++ {
 		require.Equal(t, strconv.Itoa(i+1+len(first20)+len(next20)), next60[i].Description)
 	}
 
 	currLast = next60[len(next60)-1]
-	prev20, err := s.GetPostsByHashtag(context.Background(), hashForSearchID, model.Prev, currLast.ID+1, 20)
+	prev20, err := s.GetPostsByHashtag(ctx, hashForSearchID, model.Prev, currLast.ID+1, 20)
 	require.NoError(t, err)
 	for i := 0; i < len(prev20); i++ {
 		require.Equal(t, strconv.Itoa(len(first20)+len(next20)+len(next60)-i), prev20[i].Description)

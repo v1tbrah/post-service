@@ -13,10 +13,10 @@ func (s *Storage) GetPostsByHashtag(ctx context.Context, hashtagID int64, direct
 		p.user_id,
 		p.description,
     	p.created_at
-		FROM %s AS hpp
-			INNER JOIN %s AS p
+		FROM table_hashtag_per_post AS hpp
+			INNER JOIN table_post AS p
 				ON hpp.post_id = p.id
-		WHERE hpp.hashtag_id=%d`, s.cfg.HashtagPerPostTableName, s.cfg.PostTableName, hashtagID)
+		WHERE hpp.hashtag_id=%d`, hashtagID)
 
 	switch direction {
 	case model.First:
@@ -32,7 +32,7 @@ func (s *Storage) GetPostsByHashtag(ctx context.Context, hashtagID int64, direct
 		getPostsQuery += fmt.Sprintf(" LIMIT %d", limit)
 	}
 
-	rows, err := s.dbConn.QueryContext(ctx, getPostsQuery)
+	rows, err := s.db.QueryContext(ctx, getPostsQuery)
 	if err != nil {
 		return nil, fmt.Errorf("get posts by hashtag| hashtagID: %d | postOffsetID: %d | limit: %d: %w", hashtagID, postOffsetID, limit, err)
 	}
@@ -49,7 +49,7 @@ func (s *Storage) GetPostsByHashtag(ctx context.Context, hashtagID int64, direct
 }
 
 func (s *Storage) AddHashtagToPost(ctx context.Context, postID, hashtagID int64) error {
-	if _, err := s.stmtHashtagPerPost.stmtAddHashtagToPost.ExecContext(ctx, postID, hashtagID); err != nil {
+	if _, err := s.hashtagPerPost.addHashtagToPost.ExecContext(ctx, postID, hashtagID); err != nil {
 		return fmt.Errorf("add hashatag to post| postID: %d | hashtagID: %d: %w", postID, hashtagID, err)
 	}
 

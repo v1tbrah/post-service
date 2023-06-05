@@ -1,7 +1,7 @@
-start:
+up:
 	docker-compose up -d
 
-stop:
+down:
 	docker-compose down
 
 protogen:
@@ -14,6 +14,18 @@ mockgen:
 	go install github.com/vektra/mockery/v2@v2.24.0
 	go generate ./...
 
+migrateversiongen:
+	cd migrations && \
+	go generate ./...
+
+test:
+	go test ./...
+
 test_with_db:
-	docker-compose -f docker-compose.test.yaml up --build --abort-on-container-exit && \
-    docker-compose -f docker-compose.test.yaml rm -fsv
+	docker-compose -f test.docker-compose.yaml up --build --abort-on-container-exit post-service-test
+	docker-compose -f test.docker-compose.yaml down --volumes
+
+push_to_dockerhub:
+	docker build -t v1tbrah/post-service:v1 .
+	docker tag v1tbrah/post-service:v1 v1tbrah/post-service:v1-release
+	docker push v1tbrah/post-service:v1-release

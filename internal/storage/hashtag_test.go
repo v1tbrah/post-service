@@ -11,15 +11,17 @@ import (
 )
 
 func TestStorage_CreateHashtag(t *testing.T) {
+	ctx := context.Background()
+
 	s := tHelperInitEmptyDB(t)
 
 	testHashtag := model.Hashtag{Name: "testHashtagName"}
-	idNewHashtag, err := s.CreateHashtag(context.Background(), testHashtag)
+	idNewHashtag, err := s.CreateHashtag(ctx, testHashtag)
 	if err != nil {
 		t.Fatalf("s.CreateHashtag: %v", err)
 	}
 
-	row := s.dbConn.QueryRow(fmt.Sprintf("SELECT name FROM %s WHERE id=%d", s.cfg.HashtagTableName, idNewHashtag))
+	row := s.db.QueryRow(fmt.Sprintf("SELECT name FROM table_hashtag WHERE id=%d", idNewHashtag))
 	if err = row.Scan(&testHashtag.Name); err != nil {
 		t.Fatalf("scan get new hashtag name: %v", err)
 	}
@@ -33,10 +35,12 @@ func TestStorage_CreateHashtag(t *testing.T) {
 }
 
 func TestStorage_GetHashtag(t *testing.T) {
+	ctx := context.Background()
+
 	s := tHelperInitEmptyDB(t)
 
 	testHashtag := model.Hashtag{Name: "testHashtagName"}
-	row := s.dbConn.QueryRow(fmt.Sprintf("INSERT INTO %s (name) VALUES('%s') RETURNING id", s.cfg.HashtagTableName, testHashtag.Name))
+	row := s.db.QueryRow(fmt.Sprintf("INSERT INTO table_hashtag (name) VALUES('%s') RETURNING id", testHashtag.Name))
 	if err := row.Scan(&testHashtag.ID); err != nil {
 		t.Fatalf("scan new hashtag id: %v", err)
 	}
@@ -44,7 +48,7 @@ func TestStorage_GetHashtag(t *testing.T) {
 		t.Fatalf("check scan new hashtag id: %v", row.Err())
 	}
 
-	testHashtag, err := s.GetHashtag(context.Background(), testHashtag.ID)
+	testHashtag, err := s.GetHashtag(ctx, testHashtag.ID)
 	if err != nil {
 		t.Fatalf("get hashtag: %v", err)
 	}

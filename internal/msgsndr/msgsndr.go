@@ -16,10 +16,10 @@ type Sender struct {
 	topicPostCreatedConn *kafka.Conn
 	topicPostDeletedConn *kafka.Conn
 
-	cfg config.KafkaConfig
+	cfg config.Kafka
 }
 
-func New(ctx context.Context, cfg config.KafkaConfig) (*Sender, error) {
+func New(ctx context.Context, cfg config.Kafka) (*Sender, error) {
 	if !cfg.Enable {
 		return nil, nil
 	}
@@ -51,13 +51,13 @@ func (ms *Sender) Close(ctx context.Context) (err error) {
 
 	go func() {
 		if err = ms.topicPostCreatedConn.Close(); err != nil {
-			err = errors.Wrap(err, "topicPostCreatedConn.Close")
+			err = errors.Wrap(err, "topicPostCreatedConn.close")
 			closed <- struct{}{}
 			return
 		}
 
 		if err = ms.topicPostDeletedConn.Close(); err != nil {
-			err = errors.Wrap(err, "topicPostDeletedConn.Close")
+			err = errors.Wrap(err, "topicPostDeletedConn.close")
 			closed <- struct{}{}
 			return
 		}

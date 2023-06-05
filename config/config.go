@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/pkg/errors"
@@ -14,31 +13,31 @@ const (
 )
 
 type Config struct {
-	GRPCConfig    GRPCConfig
-	StorageConfig StorageConfig
-	KafkaConfig   KafkaConfig
+	GRPC    GRPC
+	Storage Storage
+	Kafka   Kafka
 
 	LogLvl zerolog.Level
 }
 
 func NewDefaultConfig() Config {
 	return Config{
-		GRPCConfig:    newDefaultGRPCConfig(),
-		StorageConfig: newDefaultStorageConfig(),
-		KafkaConfig:   newDefaultKafkaConfig(),
-		LogLvl:        defaultLogLvl,
+		GRPC:    newDefaultGRPCConfig(),
+		Storage: newDefaultStorageConfig(),
+		Kafka:   newDefaultKafkaConfig(),
+		LogLvl:  defaultLogLvl,
 	}
 }
 
 func (c *Config) ParseEnv() error {
-	c.GRPCConfig.parseEnv()
+	c.GRPC.parseEnv()
 
-	c.StorageConfig.parseEnv()
+	c.Storage.parseEnv()
 
-	c.KafkaConfig.parseEnv()
+	c.Kafka.parseEnv()
 
 	if err := c.parseEnvLogLvl(); err != nil {
-		return errors.Wrapf(err, "parse log lvl")
+		return errors.Wrapf(err, "parseEnvLogLvl")
 	}
 
 	return nil
@@ -49,7 +48,7 @@ func (c *Config) parseEnvLogLvl() error {
 	if envLogLvl != "" {
 		logLevel, err := zerolog.ParseLevel(envLogLvl)
 		if err != nil {
-			return fmt.Errorf("parse log lvl: %s", envLogLvl)
+			return errors.Wrapf(err, "zerolog.ParseLevel: %s", envLogLvl)
 		}
 		c.LogLvl = logLevel
 	}

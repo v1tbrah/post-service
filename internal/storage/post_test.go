@@ -15,6 +15,8 @@ import (
 )
 
 func TestStorage_CreatePost(t *testing.T) {
+	ctx := context.Background()
+
 	s := tHelperInitEmptyDB(t)
 
 	tests := []struct {
@@ -35,7 +37,7 @@ func TestStorage_CreatePost(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			s = tHelperInitEmptyDB(t)
 
-			id, err := s.CreatePost(context.Background(), tt.post)
+			id, err := s.CreatePost(ctx, tt.post)
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {
@@ -43,7 +45,7 @@ func TestStorage_CreatePost(t *testing.T) {
 			}
 
 			postFromDB := model.Post{}
-			row := s.dbConn.QueryRow(fmt.Sprintf("SELECT user_id, created_at, description FROM %s WHERE id=%d", s.cfg.PostTableName, id))
+			row := s.db.QueryRow(fmt.Sprintf("SELECT user_id, created_at, description FROM table_post WHERE id=%d", id))
 			if err = row.Scan(&postFromDB.UserID, &postFromDB.CreatedAt, &postFromDB.Description); err != nil {
 				t.Fatalf("scan new post: %v", err)
 			}
@@ -75,10 +77,10 @@ func TestStorage_DeletePost(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			s := tHelperInitEmptyDB(t)
 
-			createPostStmt, err := s.dbConn.Prepare(fmt.Sprintf(`
-INSERT INTO %s (user_id, description, created_at)
+			createPostStmt, err := s.db.Prepare(`
+INSERT INTO table_post (user_id, description, created_at)
 VALUES ($1, $2, $3) RETURNING id
-`, s.cfg.PostTableName))
+`)
 
 			if err != nil {
 				t.Fatalf("prepare create post stmt: %v", err)
@@ -99,7 +101,7 @@ VALUES ($1, $2, $3) RETURNING id
 			}
 
 			var count int64
-			row := s.dbConn.QueryRow(fmt.Sprintf("SELECT COUNT(id) FROM %s WHERE id=%d", s.cfg.PostTableName, id))
+			row := s.db.QueryRow(fmt.Sprintf("SELECT COUNT(id) FROM table_post WHERE id=%d", id))
 			if err = row.Scan(&count); err != nil {
 				t.Fatalf("scan count posts: %v", err)
 			}
@@ -109,6 +111,8 @@ VALUES ($1, $2, $3) RETURNING id
 }
 
 func TestStorage_GetPost(t *testing.T) {
+	ctx := context.Background()
+
 	s := tHelperInitEmptyDB(t)
 
 	tests := []struct {
@@ -128,10 +132,10 @@ func TestStorage_GetPost(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			s = tHelperInitEmptyDB(t)
 
-			createPostStmt, err := s.dbConn.Prepare(fmt.Sprintf(`
-INSERT INTO %s (user_id, description, created_at)
+			createPostStmt, err := s.db.Prepare(`
+INSERT INTO table_post (user_id, description, created_at)
 VALUES ($1, $2, $3) RETURNING id
-`, s.cfg.PostTableName))
+`)
 
 			if err != nil {
 				t.Fatalf("prepare create post stmt: %v", err)
@@ -142,7 +146,7 @@ VALUES ($1, $2, $3) RETURNING id
 				t.Fatalf("scan created post id: %v", err)
 			}
 
-			postFromDB, err := s.GetPost(context.Background(), id)
+			postFromDB, err := s.GetPost(ctx, id)
 			tt.input.ID = postFromDB.ID
 			require.NoError(t, err)
 			assert.Equal(t, tt.input, postFromDB)
@@ -216,10 +220,10 @@ func TestStorage_GetPostsByUserID(t *testing.T) {
 			s := tHelperInitEmptyDB(t)
 
 			for _, post := range tt.input {
-				createPostStmt, err := s.dbConn.Prepare(fmt.Sprintf(`
-INSERT INTO %s (user_id, description, created_at)
+				createPostStmt, err := s.db.Prepare(`
+INSERT INTO table_post (user_id, description, created_at)
 VALUES ($1, $2, $3) RETURNING id
-`, s.cfg.PostTableName))
+`)
 				if err != nil {
 					t.Fatalf("prepare create post stmt: %v", err)
 				}
