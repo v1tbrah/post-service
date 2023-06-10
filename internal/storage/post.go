@@ -8,7 +8,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"gitlab.com/pet-pr-social-network/post-service/internal/model"
+	"github.com/v1tbrah/post-service/internal/model"
 )
 
 func (s *Storage) CreatePost(ctx context.Context, post model.Post) (id int64, err error) {

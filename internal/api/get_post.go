@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"gitlab.com/pet-pr-social-network/post-service/ppbapi"
+	"github.com/v1tbrah/post-service/ppbapi"
 )
 
 func (a *API) GetPost(ctx context.Context, req *ppbapi.GetPostRequest) (*ppbapi.GetPostResponse, error) {

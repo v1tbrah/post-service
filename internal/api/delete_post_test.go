@@ -11,10 +11,10 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"gitlab.com/pet-pr-social-network/post-service/internal/api/mocks"
-	"gitlab.com/pet-pr-social-network/post-service/internal/msgsndr"
-	"gitlab.com/pet-pr-social-network/post-service/internal/storage"
-	"gitlab.com/pet-pr-social-network/post-service/ppbapi"
+	"github.com/v1tbrah/post-service/internal/api/mocks"
+	"github.com/v1tbrah/post-service/internal/msgsndr"
+	"github.com/v1tbrah/post-service/internal/storage"
+	"github.com/v1tbrah/post-service/ppbapi"
 )
 
 func TestAPI_DeletePost(t *testing.T) {

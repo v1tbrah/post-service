@@ -8,7 +8,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
-	"gitlab.com/pet-pr-social-network/post-service/config"
+	"github.com/v1tbrah/post-service/config"
 )
 
 func TestStorage_Init(t *testing.T) {

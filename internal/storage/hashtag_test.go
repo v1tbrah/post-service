@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"testing"
 
-	"gitlab.com/pet-pr-social-network/post-service/internal/model"
+	"github.com/v1tbrah/post-service/internal/model"
 )
 
 func TestStorage_CreateHashtag(t *testing.T) {

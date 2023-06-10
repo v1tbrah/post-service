@@ -14,9 +14,9 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"gitlab.com/pet-pr-social-network/post-service/internal/api/mocks"
-	"gitlab.com/pet-pr-social-network/post-service/internal/model"
-	"gitlab.com/pet-pr-social-network/post-service/ppbapi"
+	"github.com/v1tbrah/post-service/internal/api/mocks"
+	"github.com/v1tbrah/post-service/internal/model"
+	"github.com/v1tbrah/post-service/ppbapi"
 )
 
 func TestAPI_GetPost(t *testing.T) {

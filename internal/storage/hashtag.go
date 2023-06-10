@@ -7,7 +7,7 @@ import (
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
 
-	"gitlab.com/pet-pr-social-network/post-service/internal/model"
+	"github.com/v1tbrah/post-service/internal/model"
 )
 
 func (s *Storage) CreateHashtag(ctx context.Context, hashtag model.Hashtag) (id int64, err error) {

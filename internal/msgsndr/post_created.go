@@ -7,7 +7,7 @@ import (
 	"github.com/avast/retry-go"
 	"github.com/rs/zerolog/log"
 
-	"gitlab.com/pet-pr-social-network/post-service/internal/model"
+	"github.com/v1tbrah/post-service/internal/model"
 )
 
 const (

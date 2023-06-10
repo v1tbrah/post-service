@@ -4,7 +4,7 @@ package ppbapi;
 
 import "google/protobuf/timestamp.proto";
 
-option go_package = "social_network/post-service/ppbapi";
+option go_package = "post-service/ppbapi";
 
 service PostService {
   rpc CreatePost(CreatePostRequest) returns (CreatePostResponse) {}
