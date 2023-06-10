@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/segmentio/kafka-go"
 
-	"gitlab.com/pet-pr-social-network/post-service/config"
+	"github.com/v1tbrah/post-service/config"
 )
 
 type Sender struct {

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"gitlab.com/pet-pr-social-network/post-service/internal/model"
+	"github.com/v1tbrah/post-service/internal/model"
 )
 
 func (s *Storage) GetPostsByHashtag(ctx context.Context, hashtagID int64, direction model.Direction, postOffsetID, limit int64) (posts []model.Post, err error) {

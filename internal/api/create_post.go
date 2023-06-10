@@ -9,8 +9,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"gitlab.com/pet-pr-social-network/post-service/internal/model"
-	"gitlab.com/pet-pr-social-network/post-service/ppbapi"
+	"github.com/v1tbrah/post-service/internal/model"
+	"github.com/v1tbrah/post-service/ppbapi"
 )
 
 func (a *API) CreatePost(ctx context.Context, req *ppbapi.CreatePostRequest) (*ppbapi.CreatePostResponse, error) {

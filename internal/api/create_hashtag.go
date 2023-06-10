@@ -9,9 +9,9 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"gitlab.com/pet-pr-social-network/post-service/internal/model"
-	"gitlab.com/pet-pr-social-network/post-service/internal/storage"
-	"gitlab.com/pet-pr-social-network/post-service/ppbapi"
+	"github.com/v1tbrah/post-service/internal/model"
+	"github.com/v1tbrah/post-service/internal/storage"
+	"github.com/v1tbrah/post-service/ppbapi"
 )
 
 func (a *API) CreateHashtag(ctx context.Context, req *ppbapi.CreateHashtagRequest) (*ppbapi.CreateHashtagResponse, error) {
