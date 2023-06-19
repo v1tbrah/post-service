@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -41,7 +42,7 @@ func main() {
 		log.Info().Msg("message sender initialized")
 	}
 
-	newAPI := api.New(newStorage, newMsgSender)
+	newAPI := api.New(newConfig.HTTP, newStorage, newMsgSender)
 
 	shutdownSig := make(chan os.Signal, 1)
 	signal.Notify(shutdownSig, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
@@ -53,8 +54,9 @@ func main() {
 	}()
 
 	select {
-	case <-shutdownSig:
+	case shutdownSigValue := <-shutdownSig:
 		close(shutdownSig)
+		log.Info().Msgf("Shutdown signal received: %s", strings.ToUpper(shutdownSigValue.String()))
 	case errServing := <-errServingCh:
 		if errServing != nil {
 			log.Error().Err(errServing).Msg("newAPI.StartServing")
@@ -67,12 +69,12 @@ func main() {
 	defer cancel()
 
 	if err = newAPI.GracefulStop(ctxClose); err != nil {
-		log.Error().Err(err).Msg("gRPC server graceful stop")
+		log.Error().Err(err).Msg("gRPC and HTTP server graceful stop")
 		if err == context.DeadlineExceeded {
 			return
 		}
 	} else {
-		log.Info().Msg("gRPC server gracefully stopped")
+		log.Info().Msg("gRPC and HTTP server gracefully stopped")
 	}
 
 	if err = newStorage.Close(ctxClose); err != nil {
