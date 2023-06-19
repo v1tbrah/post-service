@@ -21,7 +21,7 @@ services:
     environment:
       - GRPC_HOST=0.0.0.0
       - GRPC_PORT=5050
-      - HTTP_POST=0.0.0.0
+      - HTTP_HOST=0.0.0.0
       - HTTP_PORT=5959
       - LOG_LVL=info
       - STORAGE_HOST=post-service-storage
