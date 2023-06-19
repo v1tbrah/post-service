@@ -2,56 +2,82 @@ package api
 
 import (
 	"context"
-	"fmt"
 	"net"
+	"net/http"
 	"os"
 
+	"github.com/go-chi/chi/v5"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 
 	"github.com/v1tbrah/post-service/config"
 	"github.com/v1tbrah/post-service/ppbapi"
+	"github.com/v1tbrah/promcli"
 )
 
 type API struct {
-	server    *grpc.Server
-	storage   Storage
+	server *grpc.Server
+
+	httpServer *http.Server
+
+	promCli *promcli.HTTPReg
+
+	storage Storage
+
 	msgSender PostMsgSender
+
 	ppbapi.UnimplementedPostServiceServer
 }
 
-func New(storage Storage, msgSender PostMsgSender) (newAPI *API) {
+func New(httpCfg config.HTTP, storage Storage, msgSender PostMsgSender) (newAPI *API) {
 	newAPI = &API{
-		server: grpc.NewServer(grpc.UnaryInterceptor(
-			grpc_middleware.ChainUnaryServer(
-				interceptorLog,
-			),
-		)),
 		storage:   storage,
 		msgSender: msgSender,
+		promCli:   promcli.NewHTTP("post_service", "api"),
 	}
 
+	newAPI.server = grpc.NewServer(grpc.UnaryInterceptor(
+		grpc_middleware.ChainUnaryServer(
+			newAPI.interceptor,
+		),
+	))
+
 	ppbapi.RegisterPostServiceServer(newAPI.server, newAPI)
+
+	newAPI.httpServer = &http.Server{Addr: net.JoinHostPort(httpCfg.Host, httpCfg.Port)}
+	httpRouter := chi.NewRouter()
+	httpRouter.Handle("/metrics", promhttp.Handler())
+	newAPI.httpServer.Handler = httpRouter
 
 	return newAPI
 }
 
-func (a *API) StartServing(ctx context.Context, cfg config.GRPC, shutdownSig <-chan os.Signal) (err error) {
-	addr := net.JoinHostPort(cfg.Host, cfg.Port)
-	listen, errListen := net.Listen("tcp", addr)
+func (a *API) StartServing(ctx context.Context, cfgGRPC config.GRPC, shutdownSig <-chan os.Signal) (err error) {
+	grpcAddr := net.JoinHostPort(cfgGRPC.Host, cfgGRPC.Port)
+	listen, errListen := net.Listen("tcp", grpcAddr)
 	if errListen != nil {
-		return fmt.Errorf("net listen tcp %s server: %w", addr, errListen)
+		return errors.Wrapf(errListen, "net listen tcp %s server", grpcAddr)
 	}
 
-	serveEndSig := make(chan struct{})
-
+	grpcServeEndSig := make(chan struct{})
 	go func() {
-		log.Info().Str("addr", addr).Msg("starting gRPC server")
+		log.Info().Str("addr", grpcAddr).Msg("starting gRPC server")
 		if err = a.server.Serve(listen); err != nil {
-			err = fmt.Errorf("serve %s server: %w", addr, err)
+			err = errors.Wrapf(err, "serve grpc %s server", grpcAddr)
 		}
-		serveEndSig <- struct{}{}
+		grpcServeEndSig <- struct{}{}
+	}()
+
+	httpServeEndSig := make(chan struct{})
+	go func() {
+		log.Info().Str("addr", a.httpServer.Addr).Msg("starting HTTP server")
+		if err = a.httpServer.ListenAndServe(); err != nil {
+			err = errors.Wrapf(err, "serve http %s server", a.httpServer.Addr)
+		}
+		httpServeEndSig <- struct{}{}
 	}()
 
 	select {
@@ -59,7 +85,9 @@ func (a *API) StartServing(ctx context.Context, cfg config.GRPC, shutdownSig <-c
 		return ctx.Err()
 	case <-shutdownSig:
 		return err
-	case <-serveEndSig:
+	case <-grpcServeEndSig:
+		return err
+	case <-httpServeEndSig:
 		return err
 	}
 }
@@ -68,7 +96,12 @@ func (a *API) GracefulStop(ctx context.Context) (err error) {
 	gracefulStopEnded := make(chan struct{})
 
 	go func() {
+		if err = a.httpServer.Shutdown(ctx); err != nil {
+			err = errors.Wrap(err, "http server shutdown")
+		}
+
 		a.server.GracefulStop()
+
 		gracefulStopEnded <- struct{}{}
 	}()
 
